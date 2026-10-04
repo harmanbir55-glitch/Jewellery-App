@@ -11,11 +11,11 @@ Open `index.html` in Chrome (Safari on iPhone). Everything is in that one file.
 
 ## Put it online with GitHub Pages (open it from any phone or computer)
 
-1. Create a new repository on GitHub and upload `index.html` and `README.md`.
+1. Create a new repository on GitHub and upload every file from this folder (index.html, the icon files, favicon.ico and manifest.webmanifest).
 2. Go to **Settings → Pages**.
 3. Under **Branch**, choose `main` and `/ (root)`, then **Save**.
 4. After a minute your app is live at `https://<your-username>.github.io/<repository-name>/`.
-5. On your phone, open that link in Chrome and choose **Add to Home screen**.
+5. On your phone, open that link and choose **Add to Home screen** (Chrome) or **Share → Add to Home Screen** (Safari). On a Mac, open it in Safari and choose **File → Add to Dock**. The MJ logo is used as the app icon.
 
 ## Features
 
