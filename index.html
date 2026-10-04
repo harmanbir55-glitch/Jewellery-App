@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14513b">
+<title>Manmohan Jewellers Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Figtree:wght@400;500;600;700;800&family=Libre+Baskerville:ital,wght@1,700&family=Mukta+Mahee:wght@500;700&display=swap">
+<style>
+/* Layout: shop counter ledger. Rates column | bill entry | sticky totals. Phone: rate chips, stacked cards, bottom nav. */
+:root{
+  --cream:#fbf5e6; --paper:#fffdf6; --line:#e8dcc0; --line-2:#d9c9a3;
+  --green:#14513b; --green-2:#1f6b4f; --green-soft:#e2eee5; --green-ink:#0b3326;
+  --orange:#e0701c; --orange-2:#c65f12; --orange-soft:#fde8d3;
+  --ink:#22291f; --muted:#6c705f; --danger:#b42318; --ok:#1f7a4d;
+  --maroon:#b1122d; --wm:#d8c391;
+  --f-display:"Cinzel", "Trajan Pro", Georgia, serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-pa:"Mukta Mahee", "Noto Sans Gurmukhi", "Raavi", sans-serif;
+  --r:10px; --r-sm:7px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--cream)}
+body{margin:0;font-family:var(--f-body);color:var(--ink);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+
+/* ---------- Top bar ---------- */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--green);color:#fdf6e3;display:flex;align-items:center;gap:14px;padding:8px 16px;box-shadow:0 2px 0 var(--orange)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{width:38px;height:38px;flex:none}
+.brand b{font-family:var(--f-display);font-size:19px;letter-spacing:.04em;white-space:nowrap}
+.brand small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab{background:transparent;border:0;color:#e9f0e6;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:7px}
+.tab svg{width:18px;height:18px}
+.tab[aria-selected="true"]{background:var(--orange);color:#fff}
+.tab:hover:not([aria-selected="true"]){background:rgba(255,255,255,.1)}
+.clock{font-size:12px;opacity:.85;text-align:right;white-space:nowrap}
+
+.page{display:none;padding:16px;padding-bottom:40px}
+.page.on{display:block}
+
+/* ---------- Generic ---------- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card h2,.card h3{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:8px}
+.card h2 .sp{margin-left:auto}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+div.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+label.f span.u{font-weight:500;opacity:.8}
+.inp,select.inp,textarea.inp{width:100%;border:1px solid var(--line-2);background:#fff;border-radius:var(--r-sm);padding:9px 10px;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums;min-width:0}
+.inp:focus{border-color:var(--green-2);outline:none;box-shadow:0 0 0 3px rgba(31,107,79,.15)}
+.inp[readonly]{background:var(--green-soft);border-color:transparent;font-weight:700;color:var(--green-ink)}
+.inp:disabled{background:#f1ece0;color:#a9a796}
+.btn{border:1px solid var(--line-2);background:#fff;border-radius:var(--r-sm);padding:9px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover{border-color:var(--green-2)}
+.btn svg{width:17px;height:17px}
+.btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.pri:hover{background:var(--orange-2)}
+.btn.grn{background:var(--green);border-color:var(--green);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--green)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn.danger{color:var(--danger)}
+.btn.block{width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.grid{display:grid;gap:10px}
+.seg{display:inline-flex;background:var(--green-soft);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 12px;border-radius:7px;font-weight:700;cursor:pointer;color:var(--green)}
+.seg button[aria-pressed="true"]{background:var(--green);color:#fff}
+.seg.orange button[aria-pressed="true"]{background:var(--orange)}
+.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px}
+.pill.est{background:var(--orange-soft);color:var(--orange-2)}
+.pill.inv{background:var(--green-soft);color:var(--green)}
+.pill.due{background:#fde2df;color:var(--danger)}
+.muted{color:var(--muted)}
+.hint{font-size:12px;color:var(--muted)}
+
+/* ---------- Billing layout ---------- */
+.billing{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;gap:16px;align-items:start;max-width:1500px;margin:0 auto}
+.col-rates{position:sticky;top:76px}
+.col-sum{position:sticky;top:76px;display:grid;gap:12px}
+.main{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
+.main>*{min-width:0}
+
+/* Rates column */
+.rates{background:var(--green);color:#f6efdc;border-radius:var(--r);padding:14px;display:grid;gap:10px}
+.rates h2{margin:0;font-family:var(--f-display);font-size:16px;letter-spacing:.04em}
+.rates .date{font-size:12px;opacity:.85}
+.rate{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:2px 8px;padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.07);cursor:pointer;border:1px solid transparent}
+.rate:hover{border-color:rgba(255,255,255,.3)}
+.rate .k{font-weight:700}
+.rate .v{font-size:18px;font-weight:800;color:#ffd9a8;font-variant-numeric:tabular-nums}
+.rate .u{grid-column:1/-1;font-size:11px;opacity:.7}
+.rate .chg{font-size:11px;font-weight:700}
+.rate .chg.up{color:#9fe0b6}.rate .chg.dn{color:#ffb3a3}
+.rates .warn{background:var(--orange);color:#fff;border-radius:8px;padding:9px 10px;font-size:13px;font-weight:600;display:grid;gap:8px}
+.rates .warn .row{gap:6px}
+.rates .btn{border-color:rgba(255,255,255,.35);background:transparent;color:#fff}
+.rates .btn.pri{background:#fff;color:var(--orange-2);border-color:#fff}
+.rates a{color:#ffd9a8;font-size:12px}
+.rate-edit{display:grid;gap:8px}
+.rate-edit .inp{background:#fff}
+.rate-edit label.f{color:#e9e2cc}
+
+/* Bill head */
+.billhead{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.billno{font-family:var(--f-display);font-size:20px;color:var(--green-ink)}
+.billno small{font-family:var(--f-body);font-size:12px;color:var(--muted);display:block;letter-spacing:.06em;text-transform:uppercase}
+.billhead .sp{margin-left:auto}
+.editing{background:var(--orange-soft);color:var(--orange-2);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700}
+
+.cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.6fr);align-items:end}
+.cust label.f{white-space:nowrap}
+.cust .gst{display:none}
+.is-inv .cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr)}
+.is-inv .cust .gst{display:flex}
+
+/* Item entry */
+.entry{border:2px solid var(--green);background:linear-gradient(180deg,#fffef9,var(--paper))}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);background:#fff;border-radius:99px;padding:5px 11px;font-size:13px;font-weight:600;cursor:pointer}
+.chip:hover,.chip.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.e-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.e-grid .w2{grid-column:span 2}
+.e-grid .w3{grid-column:span 3}
+.formula{font-size:12px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.formula b{color:var(--green-ink)}
+.amt-out{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;background:var(--green-soft);border-radius:8px;flex-wrap:wrap}
+.amt-out .big{font-size:24px;font-weight:800;color:var(--green-ink)}
+.dia{display:none}
+.has-dia .dia{display:flex}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;cursor:pointer;user-select:none}
+.toggle input{width:17px;height:17px;accent-color:var(--orange)}
+
+.e-row{display:grid;gap:12px;margin-top:12px;align-items:end}
+.r1{grid-template-columns:minmax(0,1fr) auto}
+.r4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.entry label.f,.entry div.f{white-space:nowrap}
+.entry:not(.has-dia) .dia{display:none!important}
+.entry.no-pol .gonly{opacity:.45}
+.toggle.inp{display:flex;align-items:center;font-weight:600;color:var(--ink);font-size:14px}
+details.more{margin-top:12px;border-top:1px dashed var(--line-2);padding-top:10px}
+details.more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--green);list-style:none}
+details.more summary::before{content:"+ "}
+details.more[open] summary::before{content:"− "}
+details.more .e-row{margin-top:8px}
+.ecalc{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:1px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:14px}
+.ecalc>div{background:var(--green-soft);padding:8px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ecalc span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ecalc b{font-size:16px;color:var(--green-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ecalc .tot{background:var(--green)}
+.ecalc .tot span{color:#cfe2d6}.ecalc .tot b{color:#ffd9a8;font-size:20px}
+.e-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+.e-actions .btn.grn{padding:11px 22px}
+/* Items list */
+.items{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.item.sel{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-soft)}
+.item .sr{width:26px;height:26px;border-radius:50%;background:var(--green-soft);color:var(--green);font-weight:800;display:grid;place-items:center;font-size:12px}
+.item .nm{font-weight:700}
+.item .nm small{font-weight:600;color:var(--orange-2);margin-left:6px}
+.item .calc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.item .am{font-weight:800;font-size:16px;text-align:right;font-variant-numeric:tabular-nums}
+.item .acts{display:flex;gap:2px}
+.iconbtn{border:0;background:transparent;padding:6px;border-radius:6px;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.iconbtn:hover{background:var(--green-soft);color:var(--green)}
+.iconbtn.del:hover{background:#fde2df;color:var(--danger)}
+.iconbtn svg{width:17px;height:17px}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1.5px dashed var(--line-2);border-radius:8px;font-size:14px}
+
+/* Summary */
+.sum{display:grid;gap:7px}
+.sum .l{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.sum .l.t{border-top:2px solid var(--green);padding-top:9px;margin-top:4px;font-size:22px;font-weight:800;color:var(--green-ink)}
+.sum .l .inp{width:120px;padding:5px 8px;text-align:right}
+.sum .gstl{display:none}
+.is-inv .sum .gstl{display:flex}
+.words{font-size:12px;color:var(--muted);font-style:italic}
+.pay{display:grid;gap:8px}
+.actions{display:grid;gap:8px}
+.actions .btn.pri{padding:13px;font-size:16px}
+.kbd{font-size:11px;color:var(--muted);text-align:center}
+kbd{font-family:inherit;background:#fff;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:11px}
+
+/* Phone bottom bar */
+.mbar{display:none}
+
+/* ---------- Reports ---------- */
+.rep{max-width:1400px;margin:0 auto;display:grid;gap:14px}
+.rep-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rep-head h1{margin:0;font-family:var(--f-display);font-size:22px;color:var(--green-ink);margin-right:auto}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-size:22px;font-weight:800;color:var(--green-ink);font-variant-numeric:tabular-nums;margin-top:3px}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi.hl{background:var(--green);border-color:var(--green)}
+.kpi.hl .k,.kpi.hl .s{color:#cfe2d6}.kpi.hl .v{color:#ffd9a8}
+.charts{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.charts .c4{grid-column:span 4}.charts .c8{grid-column:span 8}.charts .c6{grid-column:span 6}.charts .c12{grid-column:span 12}
+.chartbox{position:relative;height:260px}
+.chartbox.tall{height:300px}
+.lst{display:grid;gap:2px}
+.lst .r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:7px 4px;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.lst .r:last-child{border-bottom:0}
+.bar{height:6px;background:var(--green-soft);border-radius:4px;margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--orange);border-radius:4px}
+
+/* ---------- Bills ---------- */
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--paper)}
+table.t{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
+table.t th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);background:#fbf7ea;position:sticky;top:0}
+table.t td{padding:9px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
+table.t tr:hover td{background:#fffaf0}
+table.t td.r,table.t th.r{text-align:right}
+
+/* ---------- Settings ---------- */
+.set{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.set .full{grid-column:1/-1}
+
+/* ---------- Modal / toast ---------- */
+.modal{position:fixed;inset:0;background:rgba(14,30,22,.55);z-index:60;display:grid;place-items:center;padding:16px}
+.modal[hidden]{display:none!important}
+.mbox{background:var(--paper);border-radius:12px;max-width:100%;max-height:calc(100% - 20px);overflow:auto;padding:16px;display:grid;gap:12px}
+.mbox.conf{width:380px}
+.mbox h3{margin:0;font-size:17px}
+.pv-scale{overflow:auto;background:#d9d2bf;padding:12px;border-radius:8px;max-width:min(92vw,640px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green-ink);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;z-index:80;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+.banner{background:var(--orange-soft);color:var(--orange-2);border:1px solid #f6c89b;border-radius:var(--r);padding:9px 12px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:1500px;margin:0 auto 12px}
+.banner .btn{margin-left:auto}
+
+/* ---------- A5 bill (screen preview + print) ---------- */
+.a5{width:148mm;height:210mm;background:#fff;color:#1a1a1a;padding:6mm 7mm 5mm;display:flex;flex-direction:column;font-family:var(--f-body);font-size:8.6pt;position:relative;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.18)}
+.a5 .wm{position:absolute;left:50%;top:56%;width:62mm;height:62mm;transform:translate(-50%,-50%);opacity:.28;pointer-events:none;z-index:2}
+.a5 .h1{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4mm}
+.a5 .prop{font-family:"Libre Baskerville",Georgia,serif;font-style:italic;font-weight:700;color:var(--maroon);font-size:9.5pt}
+.a5 .doc{font-weight:800;text-decoration:underline;text-underline-offset:2px;font-size:10pt;letter-spacing:.03em;color:#222}
+.a5 .mob{text-align:right;font-weight:700;font-size:9pt;color:#222}
+.a5 .h2{display:grid;grid-template-columns:24mm 1fr;gap:3mm;align-items:center;margin-top:1.5mm}
+.a5 .h2 svg{width:23mm;height:23mm}
+.a5 .shop{text-align:center}
+.a5 .sname{font-family:var(--f-display);color:var(--maroon);font-size:21pt;line-height:1;font-weight:700;letter-spacing:.01em;border-bottom:1px solid var(--maroon);padding-bottom:1px;white-space:nowrap}
+.a5 .sname .big{font-size:25pt}
+.a5 .gov{font-weight:800;letter-spacing:.05em;font-size:10pt;margin-top:1mm;color:#333}
+.a5 .pa{font-family:var(--f-pa);color:var(--maroon);font-weight:700;font-size:12pt;line-height:1.1}
+.a5 .deals{font-weight:600;font-size:8.6pt;color:#222}
+.a5 .lucky{display:flex;align-items:center;gap:2mm;color:var(--maroon);font-weight:800;font-size:8.8pt;letter-spacing:.02em}
+.a5 .lucky::before,.a5 .lucky::after{content:"";flex:1;height:1px;background:var(--maroon)}
+.a5 .addr{font-weight:600;font-size:10pt;color:#222}
+.a5 .meta{display:grid;grid-template-columns:1fr auto;gap:1mm 6mm;margin-top:2.5mm;padding-top:2mm;border-top:1px solid #bbb;font-size:8.6pt;position:relative}
+.a5 .meta b{font-weight:800}
+.a5 .meta .rt{text-align:right}
+.a5 .body{flex:1;display:flex;flex-direction:column;margin-top:2mm;min-height:0;position:relative}
+.a5 table{width:100%;border-collapse:collapse;font-size:7.8pt;font-variant-numeric:tabular-nums;position:relative}
+.a5 th{background:rgba(177,18,45,.08);color:#5b0d19;font-weight:800;text-align:right;padding:1.3mm 1mm;border-top:1px solid #8a1a2c;border-bottom:1px solid #8a1a2c;white-space:nowrap}
+.a5 th:nth-child(2),.a5 td:nth-child(2){text-align:left}
+.a5 th:first-child,.a5 td:first-child{text-align:center}
+.a5 td{padding:1.2mm 1mm;text-align:right;border-bottom:1px solid #e3e3e3;vertical-align:top}
+.a5 td small{display:block;color:#666;font-size:6.6pt}
+.a5 .fill{flex:1;border-left:0;position:relative;background:repeating-linear-gradient(transparent 0,transparent calc(6mm - 1px),#ececec calc(6mm - 1px),#ececec 6mm)}
+.a5 .tot{display:grid;grid-template-columns:1fr 52mm;gap:3mm;border-top:1px solid #8a1a2c;padding-top:1.5mm;font-variant-numeric:tabular-nums}
+.a5 .tot .tl{display:flex;justify-content:space-between;padding:.35mm 0}
+.a5 .tot .grand{font-size:11pt;font-weight:800;border-top:1px solid #333;margin-top:.8mm;padding-top:1mm;color:#5b0d19}
+.a5 .inw{font-size:7.8pt}
+.a5 .sign{display:flex;justify-content:space-between;align-items:flex-end;margin-top:3mm;font-size:7.8pt}
+.a5 .sign div{border-top:1px solid #777;padding-top:.6mm;min-width:32mm;text-align:center}
+.a5 .terms{font-family:var(--f-pa);font-weight:700;font-size:7.3pt;line-height:1.35;margin-top:2mm;color:#3a3a3a;text-align:center}
+.a5 .terms b{font-weight:700}
+
+#printArea{display:none}
+@page{size:A5 portrait;margin:0}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  #printArea .a5{box-shadow:none;width:148mm;height:209.5mm;page-break-after:always}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1180px){
+  .billing{grid-template-columns:minmax(0,1fr) 320px}
+  .col-rates{grid-column:1/-1;position:static}
+  .rates{grid-template-columns:repeat(6,minmax(0,1fr));align-items:center}
+  .rates .wide{grid-column:1/-1}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .charts .c4{grid-column:span 6}.charts .c8{grid-column:span 12}
+}
+@media (max-width:820px){
+  body{font-size:15px}
+  .topbar{padding:8px 16px}
+  .brand b{font-size:16px}
+  .clock{display:none}
+  .tabs{position:fixed;left:0;right:0;bottom:0;margin:0;background:var(--green);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));justify-content:space-around;box-shadow:0 -2px 0 var(--orange);z-index:40}
+  .tab{flex-direction:column;gap:2px;font-size:11px;padding:6px 10px;flex:1}
+  .tab svg{width:21px;height:21px}
+  .page{padding:12px 16px 150px}
+  .billing{grid-template-columns:minmax(0,1fr)}
+  .col-sum{position:static}
+  .rates{display:flex;flex-wrap:wrap;padding:12px;gap:8px}
+  .rates>*{flex:1 1 100%}
+  .rates>.rate{flex:1 1 calc(50% - 8px);padding:8px 9px}
+  .rates .rate .v{font-size:16px}
+  .cust,.is-inv .cust{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .cust .addr{grid-column:1/-1}
+  .r1{grid-template-columns:minmax(0,1fr)}
+  .r4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .r1 .seg{display:flex}.r1 .seg button{flex:1;padding:8px 4px}
+  .ecalc{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ecalc .tot{grid-column:1/-1}
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+  .chip{white-space:nowrap}
+  .e-grid .w2,.e-grid .w3{grid-column:1/-1}
+  .item{grid-template-columns:24px minmax(0,1fr) auto;padding:9px}
+  .item .acts{grid-column:2/-1;justify-content:flex-end;margin-top:-4px}
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--line);padding:8px 16px;gap:10px;align-items:center;z-index:35}
+  .mbar .t{font-size:20px;font-weight:800;color:var(--green-ink);margin-right:auto;font-variant-numeric:tabular-nums}
+  .mbar .t small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
+  .mbar.off{display:none}
+  .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .charts .c4,.charts .c6,.charts .c8{grid-column:span 12}
+  .set{grid-template-columns:minmax(0,1fr)}
+  .pv-scale .a5{zoom:.56}
+}
+@media (prefers-reduced-motion:no-preference){
+  .item{animation:pop .18s ease-out}
+  @keyframes pop{from{transform:translateY(-4px);opacity:.4}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="brand"><span id="logoTop"></span><div><b>Manmohan Jewellers</b><small>Baba Bakala · Billing</small></div></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-p="bill" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/></svg>New Bill</button>
+    <button class="tab" role="tab" data-p="rep" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="7"/><rect x="12" y="7" width="3" height="11"/><rect x="17" y="13" width="3" height="5"/></svg>Sales</button>
+    <button class="tab" role="tab" data-p="his" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg>Bills</button>
+    <button class="tab" role="tab" data-p="set" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+  </nav>
+  <div class="clock" id="clock"></div>
+</header>
+
+<!-- ================= PAGE 1: BILLING ================= -->
+<section class="page on" id="p-bill">
+  <div class="billing" id="billing">
+    <!-- Rates column -->
+    <aside class="col-rates">
+      <div class="rates" id="rates"></div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="card">
+        <div class="billhead">
+          <div class="seg orange" id="typeSeg">
+            <button data-t="estimate" aria-pressed="true">Estimate</button>
+            <button data-t="invoice" aria-pressed="false">GST Invoice</button>
+          </div>
+          <div class="billno"><small id="billLbl">Estimate no.</small><span id="billNo">EST-0001</span></div>
+          <span class="editing" id="editingTag" hidden>Editing saved bill</span>
+          <label class="f sp" style="flex-direction:row;align-items:center;gap:8px">Date <input type="date" class="inp" id="billDate" style="width:auto"></label>
+        </div>
+        <div class="grid cust" style="margin-top:12px">
+          <label class="f">Customer name<input class="inp" id="cName" list="custList" autocomplete="off" placeholder="e.g. Gurpreet Kaur"></label>
+          <label class="f">Mobile<input class="inp" id="cPhone" inputmode="tel" autocomplete="off" placeholder="98xxxxxxxx"></label>
+          <label class="f addr">Address / village<input class="inp" id="cAddr" autocomplete="off" placeholder="Baba Bakala"></label>
+          <label class="f gst">Customer GSTIN<input class="inp" id="cGst" autocomplete="off" style="text-transform:uppercase"></label>
+        </div>
+        <datalist id="custList"></datalist>
+      </div>
+
+      <div class="card entry" id="entry">
+        <h2><span id="entryTitle">Add item</span><span class="sp hint" style="letter-spacing:0;text-transform:none;font-weight:600">Press Enter to add</span></h2>
+        <div class="chips" id="prodChips"></div>
+        <div class="e-row r1">
+          <label class="f">Product<input class="inp" id="eProd" list="prodList" autocomplete="off" placeholder="Ring, Chain, Kada…"></label>
+          <div class="f">Metal<div class="seg" id="metalSeg"></div></div>
+        </div>
+        <div class="e-row r4">
+          <label class="f">Net wt (g)<input class="inp" id="eNet" type="number" step="0.001" min="0" inputmode="decimal" placeholder="0.000"></label>
+          <label class="f gonly">Polish %<input class="inp" id="ePol" type="number" step="0.01" min="0" inputmode="decimal"></label>
+          <label class="f">Stone wt (g)<input class="inp" id="eStone" type="number" step="0.001" min="0" inputmode="decimal" placeholder="0.000"></label>
+          <label class="f"><span id="rateLbl">Rate ₹/10 g</span><input class="inp" id="eRate" type="number" step="1" min="0" inputmode="decimal"></label>
+        </div>
+        <div class="e-row r4 dia">
+          <label class="f">Diamond (ct)<input class="inp" id="eDct" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></label>
+          <label class="f">₹ per carat<input class="inp" id="eDrate" type="number" step="1" min="0" inputmode="decimal"></label>
+        </div>
+        <details class="more" id="eMore"><summary>More options: pieces, labour, HUID, diamond</summary>
+          <div class="e-row r4">
+            <label class="f">Pieces<input class="inp" id="ePcs" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+            <label class="f">Labour ₹<input class="inp" id="eLab" type="number" step="1" min="0" inputmode="decimal" placeholder="0"></label>
+            <label class="f">HUID<input class="inp" id="eHuid" autocomplete="off" maxlength="6" style="text-transform:uppercase"></label>
+            <div class="f">Diamond<label class="toggle inp"><input type="checkbox" id="eHasDia"> Has diamond</label></div>
+          </div>
+        </details>
+        <div class="ecalc">
+          <div class="gonly"><span>Polish wt</span><b id="ePolW">0.000 g</b></div>
+          <div><span>Weight</span><b id="eWt">0.000 g</b></div>
+          <div><span>Metal price</span><b id="eMetal">₹0</b></div>
+          <div class="dia"><span>Diamond price</span><b id="eDprice">₹0</b></div>
+          <div class="tot"><span>Item price</span><b id="eAmt">₹0</b></div>
+        </div>
+        <div class="e-actions">
+          <button class="btn ghost" id="eClear">Clear</button>
+          <button class="btn grn" id="eAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span>Add to bill</span></button>
+        </div>
+        <datalist id="prodList"></datalist>
+      </div>
+
+      <div class="card">
+        <h2>Items on this bill <span class="sp muted" id="itemCount" style="letter-spacing:0;text-transform:none;font-weight:600"></span></h2>
+        <div class="items" id="items"></div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <aside class="col-sum">
+      <div class="card">
+        <h2>Bill total</h2>
+        <div class="sum">
+          <div class="l"><span>Items total</span><b id="sSub">₹0</b></div>
+          <div class="l"><span>Discount</span><input class="inp" id="sDisc" type="number" min="0" step="1" inputmode="decimal" placeholder="0"></div>
+          <div class="l gstl" id="lCgst"><span id="tCgst">CGST 1.5%</span><span id="sCgst">₹0</span></div>
+          <div class="l gstl" id="lSgst"><span id="tSgst">SGST 1.5%</span><span id="sSgst">₹0</span></div>
+          <div class="l gstl" id="lIgst" hidden><span id="tIgst">IGST 3%</span><span id="sIgst">₹0</span></div>
+          <div class="l"><span>Old gold (−)</span><input class="inp" id="sExch" type="number" min="0" step="1" inputmode="decimal" placeholder="0"></div>
+          <div class="l" id="lCard" hidden><span id="tCard">Card charges</span><span id="sCard">₹0</span></div>
+          <div class="l"><span class="muted">Round off</span><span class="muted" id="sRound">0.00</span></div>
+          <div class="l t"><span>Total</span><span id="sTotal">₹0</span></div>
+          <div class="words" id="sWords"></div>
+        </div>
+      </div>
+      <div class="card pay">
+        <h2>Payment</h2>
+        <div class="seg" id="paySeg">
+          <button data-m="Cash" aria-pressed="true">Cash</button><button data-m="UPI" aria-pressed="false">UPI</button><button data-m="Card" aria-pressed="false">Card</button><button data-m="Bank" aria-pressed="false">Bank</button>
+        </div>
+        <label class="f">Amount received ₹<input class="inp" id="sPaid" type="number" min="0" step="1" inputmode="decimal" placeholder="Full payment"></label>
+        <div class="l" style="display:flex;justify-content:space-between"><span>Balance due</span><b id="sBal" class="num">₹0</b></div>
+      </div>
+      <div class="actions">
+        <button class="btn pri" id="btnPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print &amp; start new bill</button>
+        <div class="row" style="flex-wrap:nowrap">
+          <button class="btn block" id="btnPreview">Preview A5</button>
+          <button class="btn block" id="btnSave">Save only</button>
+        </div>
+        <button class="btn ghost danger" id="btnNew">Discard and start fresh</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= PAGE 2: SALES REPORT ================= -->
+<section class="page" id="p-rep">
+  <div class="rep">
+    <div class="banner" id="sampleBanner" hidden style="margin:0">Sample bills are loaded so you can see how reports look. <button class="btn sm" id="clearSampleTop">Clear sample bills</button></div>
+    <div class="rep-head">
+      <h1>Sales report</h1>
+      <select class="inp" id="rPeriod" style="width:auto">
+        <option value="month">This month</option><option value="3m">Last 3 months</option><option value="year" selected>This year</option><option value="all">All time</option>
+      </select>
+      <div class="seg" id="rType"><button data-v="all" aria-pressed="true">All</button><button data-v="estimate" aria-pressed="false">Estimates</button><button data-v="invoice" aria-pressed="false">GST</button></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="charts">
+      <div class="card c4"><h3>Highest selling items</h3><div class="chartbox"><canvas id="cTop"></canvas></div></div>
+      <div class="card c4"><h3>Lowest selling items</h3><div class="chartbox"><canvas id="cLow"></canvas></div></div>
+      <div class="card c4"><h3>Sales by metal</h3><div class="chartbox"><canvas id="cMetal"></canvas></div></div>
+      <div class="card c8"><h3>Monthly sales <select class="inp sp" id="rYear" style="width:auto;margin-left:auto;padding:4px 8px;font-size:13px"></select></h3><div class="chartbox tall"><canvas id="cMonth"></canvas></div><div class="hint">Tap a month bar to see that month's bills.</div></div>
+      <div class="card c4"><h3>Top customers</h3><div class="lst" id="topCust"></div></div>
+      <div class="card c6"><h3>Gold 24K rate trend <span class="sp hint" style="letter-spacing:0;text-transform:none">₹ per 10 g</span></h3><div class="chartbox"><canvas id="cRate"></canvas></div></div>
+      <div class="card c6"><h3>Pending balances</h3><div class="lst" id="dues"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BILLS HISTORY ================= -->
+<section class="page" id="p-his">
+  <div class="rep">
+    <div class="rep-head">
+      <h1>All bills</h1>
+      <input class="inp" id="hSearch" placeholder="Search name, mobile, bill no, item" style="width:min(320px,100%)">
+      <div class="seg" id="hType"><button data-v="all" aria-pressed="true">All</button><button data-v="estimate" aria-pressed="false">Estimates</button><button data-v="invoice" aria-pressed="false">GST</button></div>
+      <select class="inp" id="hMonth" style="width:auto"></select>
+      <button class="btn sm" id="hCsv">Export CSV</button>
+    </div>
+    <div class="hint" id="hSummary"></div>
+    <div class="tblwrap"><table class="t"><thead><tr><th>Bill no</th><th>Date</th><th>Customer</th><th>Items</th><th class="r">Gold / Silver g</th><th class="r">Total</th><th>Pay</th><th></th></tr></thead><tbody id="hBody"></tbody></table></div>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section class="page" id="p-set">
+  <div class="set">
+    <div class="card">
+      <h2>Shop details on the bill</h2>
+      <div class="grid">
+        <label class="f">Shop name<input class="inp" id="sShop"></label>
+        <label class="f">Proprietor line<input class="inp" id="sProp"></label>
+        <label class="f">Mobile<input class="inp" id="sMob"></label>
+        <label class="f">Punjabi line<input class="inp" id="sPa" style="font-family:var(--f-pa)"></label>
+        <label class="f">Deals in<input class="inp" id="sDeals"></label>
+        <label class="f">Highlight line<input class="inp" id="sLucky"></label>
+        <label class="f">Address<input class="inp" id="sAddr"></label>
+        <label class="f">Shop GSTIN <span class="u">(printed on GST invoice only)</span><input class="inp" id="sGstin" style="text-transform:uppercase"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Tax, numbering and defaults</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <label class="f">GST %<input class="inp" id="sGstRate" type="number" step="0.01"></label>
+        <label class="f">GST type<select class="inp" id="sGstMode"><option value="split">CGST + SGST (Punjab)</option><option value="igst">IGST (other state)</option></select></label>
+        <label class="f">Estimate prefix<input class="inp" id="sEstP"></label>
+        <label class="f">Next estimate no.<input class="inp" id="sEstN" type="number" min="1"></label>
+        <label class="f">Invoice prefix<input class="inp" id="sInvP"></label>
+        <label class="f">Next invoice no.<input class="inp" id="sInvN" type="number" min="1"></label>
+        <label class="f">Default polish %<input class="inp" id="sPolDef" type="number" step="0.01"></label>
+        <label class="f">Card charges %<input class="inp" id="sCardPct" type="number" step="0.01"></label>
+        <label class="f">Default diamond ₹/ct<input class="inp" id="sDiaDef" type="number" step="1"></label>
+        <label class="f">Filler lines on print<select class="inp" id="sFill"><option value="1">Ruled lines</option><option value="0">Blank</option></select></label>
+      </div>
+    </div>
+    <div class="card full">
+      <h2>Terms printed at the bottom</h2>
+      <textarea class="inp" id="sTerms" rows="3" style="font-family:var(--f-pa)"></textarea>
+    </div>
+    <div class="card full">
+      <h2>Product list <span class="sp hint" style="letter-spacing:0;text-transform:none">One per line. These appear as suggestions while billing.</span></h2>
+      <textarea class="inp" id="sProducts" rows="6"></textarea>
+    </div>
+    <div class="card full">
+      <h2>Your data</h2>
+      <p class="hint" style="margin:0 0 10px">Bills, rates and settings are stored in this browser on this device. Take a backup every week and keep it on another device or in your email.</p>
+      <div class="row">
+        <button class="btn grn" id="bSaveSet">Save settings</button>
+        <button class="btn" id="bBackup">Download backup</button>
+        <label class="btn" for="bRestore">Restore from backup</label><input type="file" id="bRestore" accept=".json,application/json" hidden>
+        <button class="btn" id="bClearSample">Clear sample bills</button>
+        <button class="btn danger" id="bReset">Erase everything</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="mbar" id="mbar"><div class="t"><small id="mLbl">Estimate total</small><span id="mTotal">₹0</span></div><button class="btn" id="mPrev">Preview</button><button class="btn pri" id="mPrint">Print</button></div>
+
+<div class="modal" id="pvModal" hidden><div class="mbox"><div class="row" style="justify-content:space-between;align-items:center"><h3 id="pvTitle">A5 preview</h3><div class="row"><button class="btn pri" id="pvPrint">Print</button><button class="btn" id="pvClose">Close</button></div></div><div class="pv-scale" id="pvBody"></div></div></div>
+<div class="modal" id="cfModal" hidden><div class="mbox conf"><h3 id="cfTitle">Are you sure?</h3><p id="cfText" class="muted" style="margin:0"></p><div class="row" style="justify-content:flex-end"><button class="btn" id="cfNo">Cancel</button><button class="btn pri" id="cfYes">Yes</button></div></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<div id="printArea"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function(){
+"use strict";
+/* ================= Storage ================= */
+const KEY='mj_billing_v1';
+const store={get(k,d){try{const v=localStorage.getItem(KEY+'_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(KEY+'_'+k,JSON.stringify(v));return true}catch(e){toast('Could not save on this device (storage full or blocked).');return false}}};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+
+const METALS=[
+  {k:'G24',n:'Gold 24K',s:'24K',gold:true,unit:'10 g',div:10},
+  {k:'G22',n:'Gold 22K',s:'22K',gold:true,unit:'10 g',div:10},
+  {k:'G18',n:'Gold 18K',s:'18K',gold:true,unit:'10 g',div:10},
+  {k:'G14',n:'Gold 14K',s:'14K',gold:true,unit:'10 g',div:10},
+  {k:'SIL',n:'Silver',s:'Silver',gold:false,unit:'kg',div:1000},
+  {k:'ISIL',n:'Italian Silver',s:'Italian',gold:false,unit:'kg',div:1000}
+];
+const M=k=>METALS.find(m=>m.k===k)||METALS[1];
+const PURITY={G24:.995,G22:.916,G18:.75,G14:.585};
+
+const DEFAULT_PRODUCTS=['Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
+
+const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
+ terms:'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ : 1. ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਦੇ ਚਾਰਜ ਅਲਗ ਤੋਂ ਲੱਗਣਗੇ। 2. ਵਾਪਸੀ ਤੇ ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਨਹੀਂ ਮਿਲੇਗੀ। 3. ਡਾਇਮੰਡ ਦੇ ਸਮਾਨ ਦੀ ਵਾਪਸੀ ਤੇ ਪੈਸੇ 20% ਕੱਟ ਕੇ ਮਿਲਣਗੇ। 4. 50% ਐਡਵਾਂਸ ਦੇਣ ਨਾਲ ਹੀ ਉਸ ਦਿਨ ਦਾ ਰੇਟ ਪੱਕਾ ਹੋਵੇਗਾ (ਤਿੰਨ ਮਹੀਨੇ ਦੇ ਅੰਦਰ ਅੰਦਰ) 5. ਕਾਰਡ ਤੋਂ ਪੇਮੈਂਟ ਕਰਨ ਦੇ ਪੈਸੇ ਵੱਖਰੇ ਲੱਗਣਗੇ।',
+ products:DEFAULT_PRODUCTS};
+
+let S=Object.assign({},DEF_SETTINGS,store.get('settings',{}));
+let bills=store.get('bills',null);
+let rateHist=store.get('rates',null); // [{date,G24,G22,G18,G14,SIL}]
+
+/* ================= Formatting ================= */
+const inr=n=>'₹'+Math.round(n||0).toLocaleString('en-IN');
+const inr2=n=>(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const g3=n=>(+n||0).toFixed(3);
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=iso=>{const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
+function words(n){
+  n=Math.floor(n);if(n===0)return 'Zero';
+  const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const two=x=>x<20?a[x]:b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');
+  const three=x=>(x>=100?a[Math.floor(x/100)]+' Hundred'+(x%100?' ':''):'')+(x%100?two(x%100):'');
+  let s='';const cr=Math.floor(n/1e7);n%=1e7;const l=Math.floor(n/1e5);n%=1e5;const t=Math.floor(n/1e3);n%=1e3;
+  if(cr)s+=(cr>99?words(cr):two(cr))+' Crore ';if(l)s+=two(l)+' Lakh ';if(t)s+=two(t)+' Thousand ';if(n)s+=three(n);
+  return s.trim();
+}
+
+/* ================= Logo ================= */
+function logo(o){o=o||{};const c=o.c||'#b1122d',fg=o.fg||'#f3d9a0',fill=o.fill!==false;
+ return `<svg viewBox="0 0 100 100" aria-hidden="true">${fill?`<circle cx="50" cy="50" r="48" fill="${c}"/><circle cx="50" cy="50" r="43" fill="none" stroke="${fg}" stroke-width="1.2"/>`:`<circle cx="50" cy="50" r="47" fill="none" stroke="${c}" stroke-width="2.2"/>`}
+ <g fill="none" stroke="${fill?fg:c}" stroke-width="${fill?1.6:2}" stroke-linejoin="round"><path d="M38 20h24l8 9H30z"/><path d="M30 29h40L50 49z"/><path d="M42 20l-4 9 12 20 12-20-4-9M50 20v9"/></g>
+ <text x="50" y="80" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-size="30" font-weight="700" fill="${fill?fg:c}">MJ</text></svg>`}
+$('#logoTop').innerHTML=logo({c:'#e0701c',fg:'#fff6e4'});
+
+/* ================= Sample data ================= */
+function seedRates(){
+  const out=[];const d=new Date();d.setDate(d.getDate()-1);
+  let g=112400;
+  for(let i=330;i>=1;i-=3){const dt=new Date();dt.setDate(dt.getDate()-i);g+=Math.round((Math.sin(i/9)*260)+95);
+    out.push(rateRow(dt.toISOString().slice(0,10),g,Math.round(g*1.28/100)*100));}
+  return out;
+}
+function rateRow(date,g24,sil){return{date,G24:g24,G22:Math.round(g24*.916/.995/10)*10,G18:Math.round(g24*.75/.995/10)*10,G14:Math.round(g24*.585/.995/10)*10,SIL:sil,ISIL:Math.round(sil*1.25/100)*100}}
+function seedBills(){
+  let seed=7;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;const pick=a=>a[Math.floor(rnd()*a.length)];
+  const names=['Gurpreet Kaur','Harjit Singh','Manpreet Kaur','Sukhwinder Singh','Rajinder Kaur','Balwinder Singh','Amandeep Kaur','Jaspal Singh','Kuldeep Kaur','Navdeep Singh','Paramjit Kaur','Ranjit Singh','Simranjeet Kaur','Tejinder Singh','Harpreet Kaur','Baljit Singh'];
+  const villages=['Baba Bakala','Beas','Rayya','Butala','Sathiala','Khilchian','Jalalabad','Timmowal'];
+  const prods=[['Ring','G22',2,6,12],['Chain','G22',5,22,10],['Kada','G22',12,30,7],['Earrings','G22',2,8,10],['Tops','G22',1.5,5,8],['Necklace Set','G22',18,45,5],['Mangalsutra','G22',6,15,4],['Bangles','G22',10,40,6],['Pendant','G22',1.5,6,6],['Nose Pin','G22',.3,1,5],['Payal','SIL',30,120,8],['Bichhua (Toe Ring)','SIL',5,15,5],['Silver Coin','SIL',10,50,3],['Italian Silver Chain','ISIL',8,25,4],['Italian Silver Bracelet','ISIL',6,18,3],['Gold Coin','G24',1,10,2],['Diamond Ring','G18',2,5,3],['Diamond Tops','G18',2,4,2],['Maang Tikka','G22',3,8,1],['Silver Glass','SIL',80,200,1]];
+  const weighted=[];prods.forEach(p=>{for(let i=0;i<p[4];i++)weighted.push(p)});
+  const out=[];const now=new Date();let est=1,inv=1;
+  for(let m=11;m>=0;m--){
+    const base=new Date(now.getFullYear(),now.getMonth()-m,1);
+    const mon=base.getMonth();const boost=[1.6,1.4,1.1,.8,.7,.6,.6,.7,.9,1.5,1.9,1.5][mon];
+    const n=Math.round((4+rnd()*4)*boost);
+    const days=m===0?Math.max(1,now.getDate()-1):new Date(base.getFullYear(),mon+1,0).getDate();
+    for(let i=0;i<n;i++){
+      const dd=new Date(base.getFullYear(),mon,1+Math.floor(rnd()*days));
+      const date=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+      const r=rateFor(date);const type=rnd()<.35?'invoice':'estimate';const items=[];
+      const k=1+Math.floor(rnd()*rnd()*3.2);
+      for(let j=0;j<k;j++){const p=pick(weighted);const net=+(p[2]+rnd()*(p[3]-p[2])).toFixed(3);const dia=p[0].startsWith('Diamond');
+        items.push(calcItem({product:p[0],metal:p[1],pcs:1,net,polishPct:M(p[1]).gold?(p[1]==='G24'?0:S.polDef):0,stone:dia?+(rnd()*.15).toFixed(3):0,rate:r[p[1]],labour:p[1]==='SIL'?Math.round(rnd()*300/50)*50:0,hasDia:dia,dct:dia?+(.1+rnd()*.5).toFixed(2):0,drate:dia?S.diaDef:0,huid:''}))}
+      const b=buildBill({type,date,items,customer:{name:pick(names),phone:'98'+String(Math.floor(rnd()*1e8)).padStart(8,'0'),addr:pick(villages),gstin:''},discount:rnd()<.3?Math.round(rnd()*10)*100:0,exchange:rnd()<.12?Math.round(rnd()*30)*1000:0,payMode:pick(['Cash','Cash','UPI','UPI','Card','Bank']),paid:''});
+      if(rnd()<.08)b.paid=Math.round(b.total*.6/100)*100,b.balance=b.total-b.paid;
+      b.no=type==='invoice'?S.invP+String(inv++).padStart(4,'0'):S.estP+String(est++).padStart(4,'0');
+      b.sample=true;out.push(b);
+    }
+  }
+  S.estN=est;S.invN=inv;store.set('settings',S);
+  return out.sort((a,b)=>a.date<b.date?-1:1);
+}
+
+/* ================= Rates ================= */
+function latestRates(){return rateHist[rateHist.length-1]}
+function rateFor(date){let r=rateHist[0];for(const x of rateHist){if(x.date<=date)r=x;else break}return r}
+function ratesTodaySet(){return latestRates().date===todayISO()}
+
+if(!rateHist||!rateHist.length){rateHist=seedRates();store.set('rates',rateHist)}
+// upgrade older saved data: Italian silver rate and products
+if(rateHist.some(r=>r.ISIL==null)){rateHist.forEach(r=>{if(r.ISIL==null)r.ISIL=Math.round(r.SIL*1.25/100)*100});store.set('rates',rateHist)}
+if(!S.products.some(p=>/italian/i.test(p))){S.products=S.products.concat(DEFAULT_PRODUCTS.filter(p=>/italian/i.test(p)));store.set('settings',S)}
+if(!bills){bills=seedBills();store.set('bills',bills)}
+
+let rateEditing=false;
+function renderRates(){
+  const r=latestRates(),prev=rateHist.length>1?rateHist[rateHist.length-2]:null;
+  const isToday=ratesTodaySet();
+  let h=`<div class="head wide"><h2>Today's Punjab rates</h2><div class="date">${isToday?'Updated today, '+fmtDate(r.date):'Last updated '+fmtDate(r.date)}</div></div>`;
+  if(rateEditing){
+    h+=`<div class="rate-edit wide">${METALS.map(m=>`<label class="f">${m.n} <span class="u">₹/${m.unit}</span><input class="inp" type="number" id="re_${m.k}" value="${r[m.k]}" inputmode="decimal"></label>`).join('')}
+    <button class="btn sm" id="reCalc" type="button">Work out 22K/18K/14K from 24K</button>
+    <div class="row"><button class="btn pri sm" id="reSave">Save today's rates</button><button class="btn sm" id="reCancel">Cancel</button></div></div>`;
+  }else{
+    if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. Check the market rate and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
+    h+=METALS.map(m=>{const d=prev?r[m.k]-prev[m.k]:0;return `<div class="rate" data-k="${m.k}" title="Tap to change"><span class="k">${m.n}</span><span class="v">${inr(r[m.k])}</span><span class="u">per ${m.unit} · ₹${(r[m.k]/m.div).toLocaleString('en-IN',{maximumFractionDigits:2})}/g ${d?`<span class="chg ${d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d).toLocaleString('en-IN')}</span>`:''}</span></div>`}).join('');
+    h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="https://www.google.com/search?q=gold+rate+today+amritsar+punjab" target="_blank" rel="noopener">Check market rate ↗</a></div>`;
+  }
+  $('#rates').innerHTML=h;
+  const on=(id,f)=>{const el=$(id);if(el)el.onclick=f};
+  on('#reEdit',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
+  on('#reEdit2',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
+  $$('#rates .rate').forEach(el=>el.onclick=()=>{rateEditing=true;renderRates();const i=$('#re_'+el.dataset.k);i.focus();i.select()});
+  on('#reCancel',()=>{rateEditing=false;renderRates()});
+  on('#reSame',()=>saveRates(Object.assign({},r)));
+  on('#reCalc',()=>{const g=num($('#re_G24').value);['G22','G18','G14'].forEach(k=>$('#re_'+k).value=Math.round(g*PURITY[k]/.995/10)*10)});
+  on('#reSave',()=>{const n={};METALS.forEach(m=>n[m.k]=num($('#re_'+m.k).value));if(METALS.some(m=>!n[m.k])){toast('Enter every rate before saving.');return}saveRates(n)});
+  $$('#rates .rate-edit input').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#reSave').click()}});
+}
+function saveRates(n){
+  n.date=todayISO();
+  if(ratesTodaySet())rateHist[rateHist.length-1]=n;else rateHist.push(n);
+  store.set('rates',rateHist);rateEditing=false;renderRates();
+  // refresh rate in the entry form if it was the default
+  if(!entryRateTouched)setEntryRate();updateEntry();
+  toast('Today\'s rates saved. New items will use them.');
+}
+
+/* ================= Item calc ================= */
+function calcItem(it){
+  const m=M(it.metal);const net=num(it.net),pcs=Math.max(1,Math.round(num(it.pcs)||1));
+  const polishPct=m.gold?num(it.polishPct):0;
+  const polishWt=+(net*polishPct/100).toFixed(3);
+  const stone=num(it.stone);
+  const wt=+(net+polishWt-stone).toFixed(3);
+  const rate=num(it.rate);
+  const metalPrice=Math.round(wt*rate/m.div);
+  const dct=it.hasDia?num(it.dct):0,drate=it.hasDia?num(it.drate):0;
+  const dprice=Math.round(dct*drate);
+  const labour=Math.round(num(it.labour));
+  const amount=metalPrice+dprice+labour;
+  return{product:(it.product||'').trim()||'Item',metal:m.k,pcs,net,polishPct,polishWt,stone,wt,rate,metalPrice,hasDia:!!it.hasDia,dct,drate,dprice,labour,amount,huid:(it.huid||'').toUpperCase()};
+}
+function buildBill(b){
+  const sub=b.items.reduce((s,i)=>s+i.amount,0);
+  const discount=Math.min(num(b.discount),sub),exchange=num(b.exchange);
+  const taxable=sub-discount;
+  const inv=b.type==='invoice';const rate=inv?num(S.gstRate):0;
+  const gst=taxable*rate/100;const igst=inv&&S.gstMode==='igst'?gst:0;const cgst=inv&&S.gstMode!=='igst'?gst/2:0;
+  const cardCh=b.payMode==='Card'?(taxable+gst)*num(S.cardPct)/100:0;
+  const gross=taxable+gst+cardCh-exchange;
+  const total=Math.max(0,Math.round(gross));
+  const paid=b.paid===''||b.paid==null?'':num(b.paid);
+  return Object.assign({},b,{sub,discount,exchange,taxable,gstRate:rate,gstMode:S.gstMode,cgst,sgst:cgst,igst,cardCh,cardPct:num(S.cardPct),roundOff:total-gross,total,paid,balance:paid===''?0:Math.max(0,total-paid)});
+}
+
+/* ================= Billing state ================= */
+let cur=null;cur=store.get('draft',null)||newDraft();
+let selIdx=-1, entryRateTouched=false;
+function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
+function saveDraft(){store.set('draft',cur)}
+let entry={metal:'G22',hasDia:false};
+
+function setType(t){cur.type=t;$$('#typeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#billing').classList.toggle('is-inv',t==='invoice');renderBillHead();renderSummary();saveDraft()}
+function nextNo(t){return t==='invoice'?S.invP+String(S.invN).padStart(4,'0'):S.estP+String(S.estN).padStart(4,'0')}
+function renderBillHead(){
+  $('#billLbl').textContent=cur.type==='invoice'?'GST invoice no.':'Estimate no.';
+  $('#billNo').textContent=cur.id?cur.no:nextNo(cur.type);
+  $('#editingTag').hidden=!cur.id;
+  $('#mLbl').textContent=(cur.type==='invoice'?'Invoice':'Estimate')+' total';
+}
+function loadForm(){
+  setType(cur.type);$('#billDate').value=cur.date;
+  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;
+  $('#sDisc').value=cur.discount;$('#sExch').value=cur.exchange;$('#sPaid').value=cur.paid;
+  setPay(cur.payMode);renderItems();renderSummary();
+}
+
+/* entry form */
+function renderMetalSeg(){$('#metalSeg').innerHTML=METALS.map(m=>`<button type="button" data-k="${m.k}" aria-pressed="${entry.metal===m.k}">${m.s}</button>`).join('');
+  $$('#metalSeg button').forEach(b=>b.onclick=()=>{setMetal(b.dataset.k);$('#eNet').focus()})}
+function setMetal(k){
+  entry.metal=k;$$('#metalSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  const m=M(k);$('#ePol').disabled=!m.gold;$('#entry').classList.toggle('no-pol',!m.gold);
+  if(!m.gold){$('#ePol').value=''}else if($('#ePol').value===''){$('#ePol').value=k==='G24'?0:S.polDef}
+  $('#rateLbl').textContent='Rate ₹/'+m.unit;entryRateTouched=false;setEntryRate();updateEntry();
+}
+function setEntryRate(){$('#eRate').value=latestRates()[entry.metal]}
+function readEntry(){return{product:$('#eProd').value,metal:entry.metal,pcs:$('#ePcs').value,net:$('#eNet').value,polishPct:$('#ePol').value,stone:$('#eStone').value,rate:$('#eRate').value,labour:$('#eLab').value,hasDia:entry.hasDia,dct:$('#eDct').value,drate:$('#eDrate').value,huid:$('#eHuid').value}}
+function updateEntry(){
+  const it=calcItem(readEntry());const m=M(it.metal);
+  $('#ePolW').textContent=m.gold?g3(it.polishWt)+' g':'—';$('#eWt').textContent=g3(it.wt)+' g';$('#eMetal').textContent=inr(it.metalPrice);$('#eDprice').textContent=inr(it.dprice);$('#eAmt').textContent=inr(it.amount);
+}
+function clearEntry(keepMetal){
+  $('#eProd').value='';$('#ePcs').value=1;$('#eNet').value='';$('#eStone').value='';$('#eLab').value='';$('#eHuid').value='';$('#eDct').value='';$('#eDrate').value=S.diaDef;
+  $('#eHasDia').checked=false;entry.hasDia=false;$('#entry').classList.remove('has-dia');$('#eMore').open=false;
+  if(!keepMetal)entry.metal='G22';$('#ePol').value='';setMetal(entry.metal);
+  selIdx=-1;$('#entryTitle').textContent='Add item';$('#eAdd span').textContent='Add to bill';renderItems();renderChips();
+}
+function addItem(){
+  const raw=readEntry();
+  if(!num(raw.net)&&!num(raw.dct)){toast('Enter the net weight first.');$('#eNet').focus();return}
+  if(!raw.product.trim()){toast('Choose or type a product name.');$('#eProd').focus();return}
+  const it=calcItem(raw);
+  if(it.wt<0){toast('Stone weight is more than the metal weight. Please check.');return}
+  if(selIdx>=0)cur.items[selIdx]=it;else cur.items.push(it);
+  rememberProduct(it.product);
+  saveDraft();clearEntry(true);renderSummary();
+  toast(selIdx>=0?'Item updated':'Added '+it.product+' · '+inr(it.amount));
+  $('#eProd').focus();
+}
+function editItem(i){
+  const it=cur.items[i];selIdx=i;
+  $('#eProd').value=it.product;$('#ePcs').value=it.pcs;$('#eNet').value=it.net;$('#eStone').value=it.stone||'';$('#eLab').value=it.labour||'';$('#eHuid').value=it.huid||'';
+  entry.metal=it.metal;setMetal(it.metal);$('#ePol').value=M(it.metal).gold?it.polishPct:'';$('#eRate').value=it.rate;entryRateTouched=true;
+  entry.hasDia=it.hasDia;$('#eHasDia').checked=it.hasDia;$('#eMore').open=!!(it.hasDia||it.labour||it.huid||it.pcs>1);$('#entry').classList.toggle('has-dia',it.hasDia);$('#eDct').value=it.dct||'';$('#eDrate').value=it.drate||S.diaDef;
+  updateEntry();$('#entryTitle').textContent='Edit item '+(i+1);$('#eAdd span').textContent='Update item';renderItems();
+  $('#entry').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function itemLine(it){const m=M(it.metal);
+  return `${it.pcs>1?it.pcs+' pcs · ':''}Net ${g3(it.net)}${m.gold&&it.polishWt?' + Pol '+g3(it.polishWt)+' ('+it.polishPct+'%)':''}${it.stone?' − St '+g3(it.stone):''} = <b>${g3(it.wt)} g</b> × ${inr(it.rate)}/${m.unit}${it.hasDia?' · Dia '+it.dct+' ct = '+inr(it.dprice):''}${it.labour?' · Lab '+inr(it.labour):''}`}
+function renderItems(){
+  const el=$('#items');
+  $('#itemCount').textContent=cur.items.length?cur.items.length+' item'+(cur.items.length>1?'s':''):'';
+  if(!cur.items.length){el.innerHTML='<div class="empty">No items yet. Pick a product above, enter the net weight and press Enter.</div>';return}
+  el.innerHTML=cur.items.map((it,i)=>`<div class="item${i===selIdx?' sel':''}"><span class="sr">${i+1}</span><div style="min-width:0"><div class="nm">${esc(it.product)}<small>${M(it.metal).n}${it.huid?' · HUID '+esc(it.huid):''}</small></div><div class="calc">${itemLine(it)}</div></div><div class="am">${inr(it.amount)}</div><div class="acts"><button class="iconbtn" data-e="${i}" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="iconbtn" data-c="${i}" title="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg></button><button class="iconbtn del" data-d="${i}" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></div>`).join('');
+  $$('#items [data-e]').forEach(b=>b.onclick=()=>editItem(+b.dataset.e));
+  $$('#items [data-c]').forEach(b=>b.onclick=()=>{cur.items.splice(+b.dataset.c+1,0,Object.assign({},cur.items[+b.dataset.c]));saveDraft();renderItems();renderSummary()});
+  $$('#items [data-d]').forEach(b=>b.onclick=()=>{cur.items.splice(+b.dataset.d,1);if(selIdx===+b.dataset.d)clearEntry(true);saveDraft();renderItems();renderSummary()});
+}
+function readBill(){
+  cur.date=$('#billDate').value||todayISO();
+  cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase()};
+  cur.discount=$('#sDisc').value;cur.exchange=$('#sExch').value;cur.paid=$('#sPaid').value;
+  return buildBill(cur);
+}
+function renderSummary(){
+  const b=readBill();saveDraft();
+  $('#sSub').textContent=inr(b.sub);
+  const half=(num(S.gstRate)/2).toString();
+  $('#tCgst').textContent='CGST '+half+'%';$('#tSgst').textContent='SGST '+half+'%';$('#tIgst').textContent='IGST '+num(S.gstRate)+'%';
+  const ig=S.gstMode==='igst';$('#lCgst').hidden=ig;$('#lSgst').hidden=ig;$('#lIgst').hidden=!ig;
+  $('#sCgst').textContent='₹'+inr2(b.cgst);$('#sSgst').textContent='₹'+inr2(b.sgst);$('#sIgst').textContent='₹'+inr2(b.igst);
+  $('#lCard').hidden=!b.cardCh;$('#tCard').textContent='Card charges '+num(S.cardPct)+'%';$('#sCard').textContent='₹'+inr2(b.cardCh);
+  $('#sRound').textContent=(b.roundOff>=0?'+':'')+b.roundOff.toFixed(2);
+  $('#sTotal').textContent=inr(b.total);$('#mTotal').textContent=inr(b.total);
+  $('#sWords').textContent=b.total?'Rupees '+words(b.total)+' only':'';
+  $('#sBal').textContent=inr(b.balance);$('#sBal').style.color=b.balance?'var(--danger)':'';
+}
+function setPay(m){cur.payMode=m;$$('#paySeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));renderSummary()}
+
+/* chips & suggestions */
+function productUsage(){const c={};bills.forEach(b=>b.items.forEach(i=>c[i.product]=(c[i.product]||0)+1));return c}
+function renderChips(){
+  const u=productUsage();const top=Object.keys(u).sort((a,b)=>u[b]-u[a]).slice(0,10);
+  const list=top.length?top:S.products.slice(0,10);
+  $('#prodChips').innerHTML=list.map(p=>`<button type="button" class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join('');
+  $$('#prodChips .chip').forEach(c=>c.onclick=()=>{$('#eProd').value=c.dataset.p;applyProductHints(c.dataset.p);$$('#prodChips .chip').forEach(x=>x.classList.toggle('on',x===c));$('#eNet').focus()});
+  $('#prodList').innerHTML=S.products.map(p=>`<option value="${esc(p)}">`).join('');
+}
+function applyProductHints(p){
+  const s=p.toLowerCase();
+  // remember last metal used for this product
+  for(let i=bills.length-1;i>=0;i--){const f=bills[i].items.find(x=>x.product.toLowerCase()===s);if(f){setMetal(f.metal);if(M(f.metal).gold)$('#ePol').value=f.polishPct;break}}
+  if(/italian/.test(s))setMetal('ISIL');
+  else if(/silver|payal|bichhua|glass|utensil/.test(s)&&M(entry.metal).gold)setMetal('SIL');
+  if(/coin|biscuit/.test(s)&&/gold/.test(s))setMetal('G24');
+  const dia=/diamond/.test(s);if(dia)$('#eMore').open=true;$('#eHasDia').checked=dia;entry.hasDia=dia;$('#entry').classList.toggle('has-dia',dia);if(dia&&M(entry.metal).k==='G22')setMetal('G18');
+  updateEntry();
+}
+function rememberProduct(p){if(!S.products.some(x=>x.toLowerCase()===p.toLowerCase())){S.products.push(p);store.set('settings',S);renderChips()}}
+function renderCustList(){const seen={};$('#custList').innerHTML=bills.slice().reverse().filter(b=>b.customer.name&&!seen[b.customer.name]&&(seen[b.customer.name]=1)).slice(0,200).map(b=>`<option value="${esc(b.customer.name)}">${esc(b.customer.phone)} · ${esc(b.customer.addr)}</option>`).join('')}
+
+/* ================= Save / print ================= */
+function finalize(){
+  const b=readBill();
+  if(!b.items.length){toast('Add at least one item before saving.');return null}
+  if(b.type==='invoice'&&!b.customer.name){toast('Enter the customer name for a GST invoice.');$('#cName').focus();return null}
+  if(cur.id){
+    const i=bills.findIndex(x=>x.id===cur.id);b.id=cur.id;b.no=cur.no;b.savedAt=new Date().toISOString();
+    // a bill switched type while editing gets a fresh number in the new series
+    if(i>=0&&bills[i].type!==b.type){b.no=nextNo(b.type);bumpNo(b.type)}
+    if(i>=0)bills[i]=b;else bills.push(b);
+  }else{
+    b.id='b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);b.no=nextNo(b.type);b.savedAt=new Date().toISOString();bumpNo(b.type);bills.push(b);
+  }
+  bills.sort((a,c)=>a.date===c.date?(a.savedAt||'').localeCompare(c.savedAt||''):a.date<c.date?-1:1);
+  store.set('bills',bills);renderCustList();return b;
+}
+function bumpNo(t){if(t==='invoice')S.invN++;else S.estN++;store.set('settings',S)}
+function startNew(){const t=cur.type;cur=newDraft(t);store.set('draft',cur);clearEntry();loadForm();$('#cName').focus()}
+function doPrint(b){
+  $('#printArea').innerHTML=billHTML(b);
+  setTimeout(()=>{try{window.print()}catch(e){}},60);
+}
+function printAndNew(){const b=finalize();if(!b)return;doPrint(b);toast(b.no+' saved. New bill ready.');startNew();refreshOther()}
+function saveOnly(){const wasEdit=!!cur.id;const b=finalize();if(!b)return;toast(b.no+(wasEdit?' updated.':' saved. New bill ready.'));startNew();refreshOther()}
+
+/* ================= A5 bill HTML ================= */
+function billHTML(b){
+  const inv=b.type==='invoice';const rows=b.items.map((it,i)=>{const m=M(it.metal);return `<tr><td>${i+1}</td><td><b>${esc(it.product)}</b>${it.pcs>1?' ×'+it.pcs:''}<small>${m.n}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?' · Dia '+it.dct+'ct @'+inr(it.drate):''}${it.labour?' · Lab '+inr(it.labour):''}</small></td><td>${g3(it.net)}</td><td>${m.gold&&it.polishWt?g3(it.polishWt):'—'}</td><td>${it.stone?g3(it.stone):'—'}</td><td><b>${g3(it.wt)}</b></td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${it.dprice?inr2(it.dprice):'—'}</td><td><b>${inr2(it.amount)}</b></td></tr>`}).join('');
+  const T=(l,v,cls)=>`<div class="tl ${cls||''}"><span>${l}</span><span>${v}</span></div>`;
+  let tot=T('Items total',inr2(b.sub));
+  if(b.discount)tot+=T('Discount','− '+inr2(b.discount));
+  if(inv){tot+=T('Taxable value',inr2(b.taxable));tot+=b.gstMode==='igst'?T('IGST '+b.gstRate+'%',inr2(b.igst)):T('CGST '+b.gstRate/2+'%',inr2(b.cgst))+T('SGST '+b.gstRate/2+'%',inr2(b.sgst))}
+  if(b.cardCh)tot+=T('Card charges '+b.cardPct+'%',inr2(b.cardCh));
+  if(b.exchange)tot+=T('Old gold / exchange','− '+inr2(b.exchange));
+  if(Math.abs(b.roundOff)>=.005)tot+=T('Round off',(b.roundOff>0?'+':'')+b.roundOff.toFixed(2));
+  tot+=T('TOTAL','₹ '+Math.round(b.total).toLocaleString('en-IN'),'grand');
+  const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
+  const big=S.shop.split(' ');
+  return `<div class="a5"><div class="wm">${logo({c:'#d8c391',fill:false})}</div>
+  <div class="h1"><span class="prop">${esc(S.prop)}</span><span class="doc">${inv?'TAX INVOICE':'ESTIMATE'}</span><span class="mob">${esc(S.mob)}</span></div>
+  <div class="h2">${logo({c:'#b1122d',fg:'#f3d9a0'})}<div class="shop"><div class="sname"><span class="big">${esc(big[0]||'')}</span> ${esc(big.slice(1).join(' '))}</div><div class="gov">GOVT. APPROVED SHOWROOM</div><div class="pa">${esc(S.pa)}</div><div class="deals">${esc(S.deals)}</div><div class="lucky">${esc(S.lucky)}</div><div class="addr">${esc(S.addr)}</div></div></div>
+  <div class="meta">${inv?`<div><b>Invoice No.</b> ${esc(b.no)}${S.gstin?' &nbsp; <b>GSTIN</b> '+esc(S.gstin):''}</div><div class="rt"><b>Dated</b> ${fmtDate(b.date)}</div>
+   <div><b>Name</b> ${esc(b.customer.name||'—')}${b.customer.addr?', '+esc(b.customer.addr):''}</div><div class="rt">${b.customer.phone?'<b>Mob</b> '+esc(b.customer.phone):''}</div>`:`<div><b>Name</b> ${esc(b.customer.name||'—')}${b.customer.addr?', '+esc(b.customer.addr):''}${b.customer.phone?' &nbsp; <b>Mob</b> '+esc(b.customer.phone):''}</div><div class="rt"><b>Dated</b> ${fmtDate(b.date)}</div>`}
+   ${inv&&b.customer.gstin?`<div><b>Customer GSTIN</b> ${esc(b.customer.gstin)}</div><div></div>`:''}</div>
+  <div class="body"><table><thead><tr><th>#</th><th>Item</th><th>Net wt</th><th>Polish</th><th>Stone</th><th>Wt (g)</th><th>Rate</th><th>Diamond</th><th>Amount ₹</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="fill" ${S.fill==='0'?'style="background:none"':''}></div>
+  <div class="tot"><div><div class="inw"><b>Rupees ${words(b.total)} only</b></div><div class="inw" style="margin-top:1mm">${gw?'Gold '+g3(gw)+' g':''}${gw&&sw?' · ':''}${sw?'Silver '+g3(sw)+' g':''} · Paid by ${esc(b.payMode)}${b.balance?` · <b>Received ${inr(b.paid)}, Balance ${inr(b.balance)}</b>`:''}</div>
+   ${inv?`<div class="sign"><div>Customer's signature</div><div>For ${esc(S.shop)}</div></div>`:''}</div><div>${tot}</div></div></div>
+  <div class="terms">${esc(S.terms)}</div></div>`;
+}
+function preview(b,title){$('#pvBody').innerHTML=billHTML(b);$('#pvTitle').textContent=title||'A5 preview';$('#pvModal').hidden=false;$('#pvPrint').onclick=()=>{if(b.id){doPrint(b);}else{$('#pvModal').hidden=true;printAndNew()}}}
+
+/* ================= Reports ================= */
+let charts={};const COLORS=['#14513b','#e0701c','#b8872b','#5f9a7c','#f2a65a','#8a5a1a','#9cc5ae','#c65f12'];
+let rType='all';
+function periodFilter(p){const now=new Date();const t=todayISO();
+  if(p==='month')return b=>b.date.slice(0,7)===t.slice(0,7);
+  if(p==='3m'){const d=new Date(now.getFullYear(),now.getMonth()-2,1);const s=d.toISOString().slice(0,7);return b=>b.date.slice(0,7)>=s}
+  if(p==='year')return b=>b.date.slice(0,4)===t.slice(0,4);
+  return()=>true}
+function chartOpts(extra){return Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#22291f',boxWidth:12,font:{family:'Figtree',size:12}}},tooltip:{callbacks:{label:c=>' '+c.label+': '+inr(c.raw)}}}},extra||{})}
+function mk(id,cfg){if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(!window.Chart||!c)return;charts[id]=new Chart(c,cfg)}
+function renderReports(){
+  const pf=periodFilter($('#rPeriod').value);const list=bills.filter(b=>pf(b)&&(rType==='all'||b.type===rType));
+  const sales=list.reduce((s,b)=>s+b.total,0);const n=list.length;
+  let gw=0,sw=0,ct=0;const byItem={},byMetal={},byCust={};
+  list.forEach(b=>{b.items.forEach(i=>{const m=M(i.metal);if(m.gold)gw+=i.wt;else sw+=i.wt;ct+=i.dct||0;
+    byItem[i.product]=(byItem[i.product]||0)+i.amount;const mk2=i.hasDia?'Diamond':m.gold?'Gold':m.n;byMetal[mk2]=(byMetal[mk2]||0)+i.amount});
+    const ck=(b.customer.name||'Walk-in')+'|'+(b.customer.phone||'');byCust[ck]=(byCust[ck]||0)+b.total});
+  const todayS=bills.filter(b=>b.date===todayISO()).reduce((s,b)=>s+b.total,0);
+  const dues=bills.filter(b=>b.balance>0);
+  $('#kpis').innerHTML=[['Sales',inr(sales),n+' bills','hl'],["Today's sales",inr(todayS),bills.filter(b=>b.date===todayISO()).length+' bills today'],['Average bill',inr(n?sales/n:0),'per bill'],['Gold sold',g3(gw)+' g','all purities'],['Silver sold',(sw/1000).toFixed(2)+' kg',g3(sw)+' g'],['Pending dues',inr(dues.reduce((s,b)=>s+b.balance,0)),dues.length+' bills']].map(k=>`<div class="kpi ${k[3]||''}"><div class="k">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
+  const sorted=Object.entries(byItem).sort((a,b)=>b[1]-a[1]);
+  const top=sorted.slice(0,5),low=sorted.slice(-5).reverse();
+  const pie=(id,data,cols)=>mk(id,{type:'pie',data:{labels:data.map(x=>x[0]),datasets:[{data:data.map(x=>Math.round(x[1])),backgroundColor:cols,borderColor:'#fffdf6',borderWidth:2}]},options:chartOpts()});
+  pie('cTop',top,COLORS);pie('cLow',low,['#c65f12','#f2a65a','#b8872b','#9cc5ae','#5f9a7c']);
+  const me=Object.entries(byMetal);mk('cMetal',{type:'doughnut',data:{labels:me.map(x=>x[0]),datasets:[{data:me.map(x=>Math.round(x[1])),backgroundColor:me.map(x=>({Gold:'#b8872b',Silver:'#9aa5a0','Italian Silver':'#e0701c',Diamond:'#14513b'})[x[0]]),borderColor:'#fffdf6',borderWidth:2}]},options:chartOpts({cutout:'58%'})});
+  // monthly
+  const years=[...new Set(bills.map(b=>b.date.slice(0,4)))].sort().reverse();if(!years.length)years.push(todayISO().slice(0,4));
+  const ys=$('#rYear');const curY=ys.value||years[0];ys.innerHTML=years.map(y=>`<option${y===curY?' selected':''}>${y}</option>`).join('');
+  const y=ys.value;const est=Array(12).fill(0),inv=Array(12).fill(0);
+  bills.filter(b=>b.date.slice(0,4)===y&&(rType==='all'||b.type===rType)).forEach(b=>{const m=+b.date.slice(5,7)-1;(b.type==='invoice'?inv:est)[m]+=b.total});
+  const mons=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  mk('cMonth',{type:'bar',data:{labels:mons,datasets:[{label:'Estimate',data:est,backgroundColor:'#e0701c',borderRadius:4,stack:'s'},{label:'GST invoice',data:inv,backgroundColor:'#14513b',borderRadius:4,stack:'s'}]},
+    options:chartOpts({scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#6c705f'}},y:{stacked:true,grid:{color:'#efe6cf'},ticks:{color:'#6c705f',callback:v=>v>=1e5?'₹'+(v/1e5).toFixed(v%1e5?1:0)+'L':'₹'+v/1000+'k'}}},
+      plugins:{legend:{position:'bottom',labels:{color:'#22291f',boxWidth:12}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+inr(c.raw),footer:it=>'Month total: '+inr(est[it[0].dataIndex]+inv[it[0].dataIndex])}}},
+      onClick:(e,els)=>{if(!els.length)return;const m=String(els[0].index+1).padStart(2,'0');showTab('his');$('#hMonth').value=y+'-'+m;renderHistory()}})});
+  // customers
+  const cust=Object.entries(byCust).sort((a,b)=>b[1]-a[1]).slice(0,6);const mx=cust.length?cust[0][1]:1;
+  $('#topCust').innerHTML=cust.length?cust.map(([k,v])=>{const[nm,ph]=k.split('|');return `<div class="r"><div style="min-width:0"><b>${esc(nm)}</b> <span class="hint">${esc(ph)}</span><div class="bar"><i style="width:${v/mx*100}%"></i></div></div><b>${inr(v)}</b></div>`}).join(''):'<div class="hint">No bills in this period.</div>';
+  // rate trend
+  const rh=rateHist.slice(-60);mk('cRate',{type:'line',data:{labels:rh.map(r=>fmtDate(r.date).slice(0,6)),datasets:[{label:'24K',data:rh.map(r=>r.G24),borderColor:'#e0701c',backgroundColor:'rgba(224,112,28,.12)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},options:chartOpts({plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+inr(c.raw)+' / 10 g'}}},scales:{x:{grid:{display:false},ticks:{color:'#6c705f',maxTicksLimit:8}},y:{grid:{color:'#efe6cf'},ticks:{color:'#6c705f',callback:v=>'₹'+(v/1000).toFixed(0)+'k'}}}})});
+  // dues
+  $('#dues').innerHTML=dues.length?dues.slice().reverse().map(b=>`<div class="r"><div style="min-width:0"><b>${esc(b.customer.name||'Walk-in')}</b> <span class="hint">${esc(b.customer.phone)} · ${esc(b.no)} · ${fmtDate(b.date)}</span></div><span><b style="color:var(--danger)">${inr(b.balance)}</b> <button class="btn sm" data-paid="${b.id}">Mark paid</button></span></div>`).join(''):'<div class="hint">No pending balances. Every bill is fully paid.</div>';
+  $$('#dues [data-paid]').forEach(x=>x.onclick=()=>{const b=bills.find(y=>y.id===x.dataset.paid);b.paid='';b.balance=0;store.set('bills',bills);renderReports();toast('Marked as fully paid.')});
+}
+
+/* ================= History ================= */
+let hType='all';
+function renderHistory(){
+  const months=[...new Set(bills.map(b=>b.date.slice(0,7)))].sort().reverse();const hm=$('#hMonth');const v=hm.value;
+  hm.innerHTML='<option value="">All months</option>'+months.map(m=>`<option value="${m}">${new Date(m+'-01T00:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</option>`).join('');hm.value=months.includes(v)?v:'';
+  const q=$('#hSearch').value.trim().toLowerCase();
+  const list=bills.filter(b=>(hType==='all'||b.type===hType)&&(!hm.value||b.date.startsWith(hm.value))&&(!q||[b.no,b.customer.name,b.customer.phone,b.customer.addr,...b.items.map(i=>i.product)].join(' ').toLowerCase().includes(q))).slice().reverse();
+  const tot=list.reduce((s,b)=>s+b.total,0);
+  $('#hSummary').textContent=list.length+' bills · '+inr(tot);
+  $('#hBody').innerHTML=list.length?list.map(b=>{const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
+    return `<tr><td><b>${esc(b.no)}</b> <span class="pill ${b.type==='invoice'?'inv':'est'}">${b.type==='invoice'?'GST':'Est'}</span></td><td>${fmtDate(b.date)}</td><td>${esc(b.customer.name||'Walk-in')}<div class="hint">${esc(b.customer.phone)}</div></td><td>${esc(b.items.map(i=>i.product).join(', '))}</td><td class="r">${gw?g3(gw):''}${gw&&sw?' / ':''}${sw?g3(sw):''}</td><td class="r"><b>${inr(b.total)}</b>${b.balance?'<div><span class="pill due">Due '+inr(b.balance)+'</span></div>':''}</td><td>${esc(b.payMode)}</td>
+    <td style="white-space:nowrap"><button class="btn sm" data-v="${b.id}">View / print</button> <button class="btn sm ghost" data-ed="${b.id}">Edit</button> <button class="btn sm ghost" data-dup="${b.id}">Copy</button> <button class="btn sm ghost danger" data-del="${b.id}">Delete</button></td></tr>`}).join(''):'<tr><td colspan="8" class="hint" style="text-align:center;padding:24px">No bills match. Try another search or month.</td></tr>';
+  const find=id=>bills.find(b=>b.id===id);
+  $$('#hBody [data-v]').forEach(x=>x.onclick=()=>{const b=find(x.dataset.v);preview(b,b.no+' · '+(b.customer.name||'Walk-in'))});
+  $$('#hBody [data-ed]').forEach(x=>x.onclick=()=>{const b=find(x.dataset.ed);cur=JSON.parse(JSON.stringify(b));cur.discount=b.discount||'';cur.exchange=b.exchange||'';saveDraft();clearEntry();loadForm();showTab('bill');toast('Editing '+b.no+'. Save to update it.')});
+  $$('#hBody [data-dup]').forEach(x=>x.onclick=()=>{const b=find(x.dataset.dup);cur=newDraft(b.type);cur.customer=Object.assign({},b.customer);cur.items=b.items.map(i=>calcItem(Object.assign({},i,{rate:latestRates()[i.metal]})));saveDraft();clearEntry();loadForm();showTab('bill');toast('Copied into a new bill at today\'s rates.')});
+  $$('#hBody [data-del]').forEach(x=>x.onclick=()=>{const b=find(x.dataset.del);confirmBox('Delete '+b.no+'?','This removes the bill for '+(b.customer.name||'walk-in')+' ('+inr(b.total)+') from records and reports.',()=>{bills=bills.filter(y=>y.id!==b.id);store.set('bills',bills);renderHistory();toast(b.no+' deleted.')})});
+}
+function download(name,text,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){toast('Download is not allowed here. Open the app file directly in Chrome.')}}
+function csv(){const rows=[['Bill no','Type','Date','Customer','Mobile','Address','Item','Metal','Pcs','Net wt','Polish %','Polish wt','Stone wt','Weight','Rate','Metal price','Diamond ct','Diamond price','Labour','Item amount','Bill total','Payment','Balance']];
+  bills.forEach(b=>b.items.forEach(i=>rows.push([b.no,b.type,b.date,b.customer.name,b.customer.phone,b.customer.addr,i.product,M(i.metal).n,i.pcs,i.net,i.polishPct,i.polishWt,i.stone,i.wt,i.rate,i.metalPrice,i.dct,i.dprice,i.labour,i.amount,b.total,b.payMode,b.balance])));
+  download('manmohan-bills-'+todayISO()+'.csv',rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
+
+/* ================= Settings ================= */
+const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sLucky:'lucky',sAddr:'addr',sGstin:'gstin',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sFill:'fill',sTerms:'terms'};
+function loadSettings(){for(const id in SET_FIELDS)$('#'+id).value=S[SET_FIELDS[id]];$('#sProducts').value=S.products.join('\n')}
+function saveSettings(){for(const id in SET_FIELDS){let v=$('#'+id).value;if(['gstRate','estN','invN','polDef','cardPct','diaDef'].includes(SET_FIELDS[id]))v=num(v);S[SET_FIELDS[id]]=v}
+  S.gstin=S.gstin.toUpperCase();S.estN=Math.max(1,Math.round(S.estN));S.invN=Math.max(1,Math.round(S.invN));
+  S.products=$('#sProducts').value.split('\n').map(x=>x.trim()).filter(Boolean);store.set('settings',S);renderChips();renderBillHead();renderSummary();toast('Settings saved.')}
+function clearSample(){const n=bills.filter(b=>b.sample).length;bills=bills.filter(b=>!b.sample);
+  if(!bills.length){S.estN=1;S.invN=1;}store.set('bills',bills);store.set('settings',S);loadSettings();renderBillHead();refreshOther();sampleBanner();toast(n+' sample bills removed.')}
+function sampleBanner(){$('#sampleBanner').hidden=!bills.some(b=>b.sample)}
+
+/* ================= UI plumbing ================= */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
+function confirmBox(title,text,yes){$('#cfTitle').textContent=title;$('#cfText').textContent=text;$('#cfModal').hidden=false;$('#cfYes').onclick=()=>{$('#cfModal').hidden=true;yes()};$('#cfNo').onclick=()=>$('#cfModal').hidden=true}
+function showTab(p){$$('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.p===p));$$('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p));$('#mbar').classList.toggle('off',p!=='bill');
+  if(p==='rep')renderReports();if(p==='his')renderHistory();if(p==='set')loadSettings();try{sessionStorage.setItem('mj_tab',p)}catch(e){}window.scrollTo(0,0)}
+function refreshOther(){renderChips();sampleBanner();if($('#p-rep').classList.contains('on'))renderReports();if($('#p-his').classList.contains('on'))renderHistory()}
+function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})+'<br>'+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
+
+/* events */
+$$('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.p));
+$$('#typeSeg button').forEach(b=>b.onclick=()=>setType(b.dataset.t));
+$$('#paySeg button').forEach(b=>b.onclick=()=>setPay(b.dataset.m));
+['#billDate','#cName','#cPhone','#cAddr','#cGst','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
+$('#cName').addEventListener('change',()=>{const n=$('#cName').value.trim();const p=bills.slice().reverse().find(b=>b.customer.name===n);if(p){if(!$('#cPhone').value)$('#cPhone').value=p.customer.phone;if(!$('#cAddr').value)$('#cAddr').value=p.customer.addr;if(!$('#cGst').value)$('#cGst').value=p.customer.gstin||'';renderSummary()}});
+$('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();if(ph.length<6)return;const p=bills.slice().reverse().find(b=>b.customer.phone===ph);if(p&&!$('#cName').value){$('#cName').value=p.customer.name;$('#cAddr').value=p.customer.addr;renderSummary();toast('Returning customer: '+p.customer.name)}});
+['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
+$('#eRate').addEventListener('input',()=>entryRateTouched=true);
+$('#eProd').addEventListener('change',()=>applyProductHints($('#eProd').value));
+$('#eHasDia').onchange=()=>{entry.hasDia=$('#eHasDia').checked;$('#entry').classList.toggle('has-dia',entry.hasDia);if(entry.hasDia&&!$('#eDrate').value)$('#eDrate').value=S.diaDef;updateEntry()};
+$('#entry').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();addItem()}});
+$('#eAdd').onclick=addItem;$('#eClear').onclick=()=>clearEntry();
+$('#btnPrint').onclick=printAndNew;$('#mPrint').onclick=printAndNew;
+$('#btnSave').onclick=saveOnly;
+$('#btnPreview').onclick=$('#mPrev').onclick=()=>{const b=readBill();if(!b.items.length){toast('Add an item to preview the bill.');return}preview(Object.assign({},b,{no:cur.id?cur.no:nextNo(b.type)}),'A5 preview')};
+$('#btnNew').onclick=()=>{if(!cur.items.length&&!cur.customer.name){startNew();return}confirmBox('Discard this bill?','The items on screen will be cleared. Saved bills are not affected.',startNew)};
+$('#pvClose').onclick=()=>$('#pvModal').hidden=true;
+$('#pvModal').onclick=e=>{if(e.target.id==='pvModal')$('#pvModal').hidden=true};
+$('#rPeriod').onchange=renderReports;$('#rYear').onchange=renderReports;
+$$('#rType button').forEach(b=>b.onclick=()=>{rType=b.dataset.v;$$('#rType button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderReports()});
+$$('#hType button').forEach(b=>b.onclick=()=>{hType=b.dataset.v;$$('#hType button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderHistory()});
+$('#hSearch').oninput=renderHistory;$('#hMonth').onchange=renderHistory;$('#hCsv').onclick=csv;
+$('#bSaveSet').onclick=saveSettings;
+$('#bBackup').onclick=()=>download('manmohan-backup-'+todayISO()+'.json',JSON.stringify({settings:S,bills,rates:rateHist},null,1),'application/json');
+$('#bRestore').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.bills))throw 0;confirmBox('Restore this backup?','It has '+d.bills.length+' bills. Bills now on this device will be replaced.',()=>{S=Object.assign({},DEF_SETTINGS,d.settings);bills=d.bills;rateHist=d.rates&&d.rates.length?d.rates:rateHist;store.set('settings',S);store.set('bills',bills);store.set('rates',rateHist);location.reload()})}catch(x){toast('That file is not a Manmohan billing backup.')}};r.readAsText(f);e.target.value=''};
+$('#bClearSample').onclick=$('#clearSampleTop').onclick=()=>confirmBox('Clear sample bills?','Only the example bills are removed. Your own bills stay.',clearSample);
+$('#bReset').onclick=()=>confirmBox('Erase everything?','All bills, rates and settings on this device will be deleted. Download a backup first.',()=>{try{Object.keys(localStorage).filter(k=>k.startsWith(KEY)).forEach(k=>localStorage.removeItem(k))}catch(e){}bills=[];store.set('bills',[]);location.reload()});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='p'&&$('#p-bill').classList.contains('on')&&$('#pvModal').hidden){e.preventDefault();printAndNew()}
+  if(e.altKey&&e.key.toLowerCase()==='n'){e.preventDefault();showTab('bill');$('#btnNew').click()}
+  if(e.key==='Escape'){$('#pvModal').hidden=true;$('#cfModal').hidden=true}
+});
+
+/* ================= Boot ================= */
+renderRates();renderMetalSeg();clearEntry();
+if(cur.items.length)selIdx=-1;
+loadForm();renderChips();renderCustList();sampleBanner();tick();setInterval(tick,30000);
+let startTab='bill';try{startTab=sessionStorage.getItem('mj_tab')||'bill'}catch(e){}
+if(['bill','rep','his','set'].includes(location.hash.slice(1)))startTab=location.hash.slice(1);
+showTab(startTab);
+})();
+</script>
+
+</body>
+</html>
