@@ -904,7 +904,7 @@ function billHTML(b){
   const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
   const rows=b.items.map((it,i)=>{const m=M(it.metal);
     const pw=m.gold?it.polishWt:0;
-    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${pw?' · Net Wt '+g3(it.net)+' + Polish '+g3(pw):''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?'<br>Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
+    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${pw?' · '+g3(it.net)+' + '+g3(pw):''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?'<br>Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
     return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net+pw)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
   const T=(l,v)=>`<div class="tl"><span>${l}</span><span>${v}</span></div>`;
   let tot=T('Items Total',inr2(b.sub));
