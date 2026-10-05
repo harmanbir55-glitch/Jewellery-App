@@ -397,7 +397,6 @@ table.t td.r,table.t th.r{text-align:right}
           <label class="f">Mobile<input class="inp" id="cPhone" inputmode="tel" autocomplete="off" placeholder="98xxxxxxxx"></label>
           <label class="f addr">Address / village<input class="inp" id="cAddr" autocomplete="off" placeholder="Baba Bakala"></label>
           <label class="f gst">Customer GSTIN<input class="inp" id="cGst" autocomplete="off" style="text-transform:uppercase"></label>
-          <label class="f gst">Customer PAN<input class="inp" id="cPan" autocomplete="off" maxlength="10" style="text-transform:uppercase"></label>
         </div>
         <datalist id="custList"></datalist>
       </div>
@@ -536,7 +535,6 @@ table.t td.r,table.t th.r{text-align:right}
         <label class="f">Deals in<input class="inp" id="sDeals"></label>
         <label class="f">Address<input class="inp" id="sAddr"></label>
         <label class="f">Shop GSTIN <span class="u">(printed on GST invoice only)</span><input class="inp" id="sGstin" style="text-transform:uppercase"></label>
-        <label class="f">Shop PAN <span class="u">(GST invoice only)</span><input class="inp" id="sPan" style="text-transform:uppercase"></label>
         <label class="f">Bank details <span class="u">(GST invoice)</span><input class="inp" id="sBank" placeholder="Bank name, A/C no., IFSC"></label>
         <label class="f">Name on GST invoice<input class="inp" id="sInvName"></label>
         <label class="f">Deals in line on GST invoice<input class="inp" id="sInvDeals"></label>
@@ -610,12 +608,12 @@ const PURITY={G24:.995,G22:.916,G18:.75,G14:.585};
 
 const DEFAULT_PRODUCTS=['Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
 
-const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',pan:'AZWPS6315F',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
+const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
  terms:'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ : 1. ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਦੇ ਚਾਰਜ ਅਲਗ ਤੋਂ ਲੱਗਣਗੇ। 2. ਵਾਪਸੀ ਤੇ ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਨਹੀਂ ਮਿਲੇਗੀ। 3. ਡਾਇਮੰਡ ਦੇ ਸਮਾਨ ਦੀ ਵਾਪਸੀ ਤੇ ਪੈਸੇ 20% ਕੱਟ ਕੇ ਮਿਲਣਗੇ। 4. 50% ਐਡਵਾਂਸ ਦੇਣ ਨਾਲ ਹੀ ਉਸ ਦਿਨ ਦਾ ਰੇਟ ਪੱਕਾ ਹੋਵੇਗਾ (ਤਿੰਨ ਮਹੀਨੇ ਦੇ ਅੰਦਰ ਅੰਦਰ) 5. ਕਾਰਡ ਤੋਂ ਪੇਮੈਂਟ ਕਰਨ ਦੇ ਪੈਸੇ ਵੱਖਰੇ ਲੱਗਣਗੇ।',
  products:DEFAULT_PRODUCTS};
 
 let S=Object.assign({},DEF_SETTINGS,store.get('settings',{}));
-['gstin','pan','bank','invName','invDeals','invTerms'].forEach(k=>{if(!S[k])S[k]=DEF_SETTINGS[k]});
+['gstin','bank','invName','invDeals','invTerms'].forEach(k=>{if(!S[k])S[k]=DEF_SETTINGS[k]});
 let bills=store.get('bills',null);
 let rateHist=store.get('rates',null); // [{date,G24,G22,G18,G14,SIL}]
 
@@ -758,7 +756,7 @@ function buildBill(b){
 /* ================= Billing state ================= */
 let cur=null;cur=store.get('draft',null)||newDraft();
 let selIdx=-1, entryRateTouched=false;
-function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:'',pan:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
+function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
 function saveDraft(){store.set('draft',cur)}
 let entry={metal:'G22',hasDia:false};
 
@@ -772,7 +770,7 @@ function renderBillHead(){
 }
 function loadForm(){
   setType(cur.type);$('#billDate').value=cur.date;
-  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;$('#cPan').value=cur.customer.pan||'';
+  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;
   $('#sDisc').value=cur.discount;$('#sExch').value=cur.exchange;$('#sPaid').value=cur.paid;
   setPay(cur.payMode);renderItems();renderSummary();
 }
@@ -831,7 +829,7 @@ function renderItems(){
 }
 function readBill(){
   cur.date=$('#billDate').value||todayISO();
-  cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase(),pan:$('#cPan').value.trim().toUpperCase()};
+  cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase()};
   cur.discount=$('#sDisc').value;cur.exchange=$('#sExch').value;cur.paid=$('#sPaid').value;
   return buildBill(cur);
 }
@@ -903,7 +901,7 @@ function billHTML(b){
   const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
   const rows=b.items.map((it,i)=>{const m=M(it.metal);
     const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?' · Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
-    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net)}</td><td>${m.gold&&it.polishWt?g3(it.polishWt):'—'}</td><td>${it.stone?g3(it.stone):'—'}</td><td><b>${g3(it.wt)}</b></td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
+    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
   const T=(l,v)=>`<div class="tl"><span>${l}</span><span>${v}</span></div>`;
   let tot=T('Items Total',inr2(b.sub));
   if(b.discount)tot+=T('Discount','− '+inr2(b.discount));
@@ -916,15 +914,15 @@ function billHTML(b){
   const gsum=inv?(b.gstMode==='igst'?`GST%    A.VALUE      IGST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.igst),9)}`:`GST%    A.VALUE      SGST      CGST   TOT GST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.sgst),9)} ${pad(inr2(b.cgst),9)} ${pad(inr2(b.sgst+b.cgst),9)}`):'';
   const leftFoot=[inv&&S.bank?`<div style="font-size:6.8pt"><b style="text-decoration:underline">Bank A/c. Details :</b><br><b>${esc(S.bank).replace(/ · /g,'<br>')}</b></div>`:'',gsum?`<div class="gsum">${gsum}</div>`:'',`<div class="kv" style="margin-top:1.2mm"><span>Payment</span><b>${esc(b.payMode)}${b.balance?` · Received ${inr(b.paid)} · Balance ${inr(b.balance)}`:''}</b></div>`].join('');
   return `<div class="a5"><div class="copy">${inv?'Original For Recipient/Buyer':''}</div><div class="box"><div class="wm">${logo({c:'#9a7a2e',fill:false})}</div>
-  <div class="hd"><div class="h1"><div>${inv?`${S.gstin?'GSTIN : '+esc(S.gstin):''}${S.pan?'<br>PAN : '+esc(S.pan):''}`:`<span class="prop">${esc(S.prop)}</span>`}</div><div class="doc">${inv?'TAX INVOICE':'ESTIMATE'}</div><div class="rt">${esc(S.mob)}${inv?`<div class="prop" style="margin-top:.5mm">${esc(S.prop)}</div>`:''}</div></div>
+  <div class="hd"><div class="h1"><div>${inv?`${S.gstin?'GSTIN : '+esc(S.gstin):''}`:`<span class="prop">${esc(S.prop)}</span>`}</div><div class="doc">${inv?'TAX INVOICE':'ESTIMATE'}</div><div class="rt">${esc(S.mob)}${inv?`<div class="prop" style="margin-top:.5mm">${esc(S.prop)}</div>`:''}</div></div>
    <div class="h2">${logo({c:'#b1122d',fg:'#f3d9a0'})}<div class="shop"><div class="sname">${esc((inv?S.invName:S.shop).toUpperCase())}</div>${inv?'':`<div class="pa">${esc(S.pa)}</div>`}<div class="deals">${esc(inv?S.invDeals:S.deals)}</div><div class="addr">${esc(S.addr.toUpperCase())}</div></div><div></div></div></div>
   <div class="row big"><div class="sp">${inv?`<span>Invoice No. &nbsp;${esc(b.no)}</span>`:'<span></span>'}<span>${pay}</span></div><div class="sp"><span>Dated</span><span>${b.date.split('-').reverse().join('/')}</span></div></div>
   <div class="row"><div><div class="lbl">Buyer's Name &amp; Address:-</div><div class="bname">${esc((b.customer.name||'Walk-in customer').toUpperCase())}</div><div style="font-size:7pt;min-height:3mm">${esc(b.customer.addr)}</div>
-    <div class="kv"><b>PHONE</b><span>${esc(b.customer.phone)}</span>${inv?`<b>GSTIN</b><span>${esc(b.customer.gstin)}</span><b>PAN</b><span>${esc(b.customer.pan||'')}</span><b>State Code/POS</b><span>03-PB</span>`:''}</div></div>
+    <div class="kv"><b>PHONE</b><span>${esc(b.customer.phone)}</span>${inv?`<b>GSTIN</b><span>${esc(b.customer.gstin)}</span><b>State Code/POS</b><span>03-PB</span>`:''}</div></div>
    <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div></div></div>
-  <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:9mm">HSN</th>':''}<th style="width:11mm">Net Wt<br>(g)</th><th style="width:10mm">Polish<br>Wt</th><th style="width:10mm">Stone<br>Wt</th><th style="width:11mm">Weight<br>(g)</th><th style="width:12mm">Rate</th><th style="width:17mm">Amount<br>(In Rs.)</th></tr></thead>
-   <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td><td></td><td></td><td></td></tr>
-   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net,0))}</td><td></td><td></td><td>${g3(gw+sw)}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
+  <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:11mm">HSN</th>':''}<th style="width:15mm">Net Wt<br>(g)</th><th style="width:17mm">Rate</th><th style="width:22mm">Amount<br>(In Rs.)</th></tr></thead>
+   <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td></tr>
+   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net,0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
   <div class="foot"><div>${leftFoot}</div><div>${tot}<div class="bill"><span>BILL AMOUNT</span><span>${inr2(b.total)}</span></div></div></div>
   <div class="words">Rupees ${words(b.total)} only</div>
   <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b><br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
@@ -1001,10 +999,10 @@ function csv(){const rows=[['Bill no','Type','Date','Customer','Mobile','Address
   download('manmohan-bills-'+todayISO()+'.csv',rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
 
 /* ================= Settings ================= */
-const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sAddr:'addr',sGstin:'gstin',sPan:'pan',sBank:'bank',sInvName:'invName',sInvDeals:'invDeals',sInvTerms:'invTerms',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
+const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sAddr:'addr',sGstin:'gstin',sBank:'bank',sInvName:'invName',sInvDeals:'invDeals',sInvTerms:'invTerms',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
 function loadSettings(){for(const id in SET_FIELDS)$('#'+id).value=S[SET_FIELDS[id]];$('#sProducts').value=S.products.join('\n')}
 function saveSettings(){for(const id in SET_FIELDS){let v=$('#'+id).value;if(['gstRate','estN','invN','polDef','cardPct','diaDef'].includes(SET_FIELDS[id]))v=num(v);S[SET_FIELDS[id]]=v}
-  S.gstin=S.gstin.toUpperCase();S.pan=(S.pan||'').toUpperCase();S.estN=Math.max(1,Math.round(S.estN));S.invN=Math.max(1,Math.round(S.invN));
+  S.gstin=S.gstin.toUpperCase();S.estN=Math.max(1,Math.round(S.estN));S.invN=Math.max(1,Math.round(S.invN));
   S.products=$('#sProducts').value.split('\n').map(x=>x.trim()).filter(Boolean);store.set('settings',S);renderChips();renderBillHead();renderSummary();toast('Settings saved.')}
 function clearSample(){const n=bills.filter(b=>b.sample).length;bills=bills.filter(b=>!b.sample);
   if(!bills.length){S.estN=1;S.invN=1;}store.set('bills',bills);store.set('settings',S);loadSettings();renderBillHead();refreshOther();sampleBanner();toast(n+' sample bills removed.')}
@@ -1022,7 +1020,7 @@ function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleDateString('e
 $$('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.p));
 $$('#typeSeg button').forEach(b=>b.onclick=()=>setType(b.dataset.t));
 $$('#paySeg button').forEach(b=>b.onclick=()=>setPay(b.dataset.m));
-['#billDate','#cName','#cPhone','#cAddr','#cGst','#cPan','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
+['#billDate','#cName','#cPhone','#cAddr','#cGst','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
 $('#cName').addEventListener('change',()=>{const n=$('#cName').value.trim();const p=bills.slice().reverse().find(b=>b.customer.name===n);if(p){if(!$('#cPhone').value)$('#cPhone').value=p.customer.phone;if(!$('#cAddr').value)$('#cAddr').value=p.customer.addr;if(!$('#cGst').value)$('#cGst').value=p.customer.gstin||'';renderSummary()}});
 $('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();if(ph.length<6)return;const p=bills.slice().reverse().find(b=>b.customer.phone===ph);if(p&&!$('#cName').value){$('#cName').value=p.customer.name;$('#cAddr').value=p.customer.addr;renderSummary();toast('Returning customer: '+p.customer.name)}});
 ['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
