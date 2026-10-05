@@ -275,6 +275,7 @@ table.t td.r,table.t th.r{text-align:right}
 .a5 th:first-child,.a5 td:first-child{border-left:0;text-align:center}
 .a5 td.d{text-align:left;font-weight:700}
 .a5 td small{display:block;font-weight:400;font-size:6.2pt;color:#333}
+.a5 td small.pw{font-weight:700;font-size:6.8pt;color:#111}
 .a5 td.c{text-align:center}
 .a5 tr.sp td{height:100%}
 .a5 tr.tt td{border-top:1px solid #111;font-weight:800;padding:1.1mm .8mm}
@@ -405,7 +406,7 @@ table.t td.r,table.t th.r{text-align:right}
         <h2><span id="entryTitle">Add item</span><span class="sp hint" style="letter-spacing:0;text-transform:none;font-weight:600">Press Enter to add</span></h2>
         <div class="chips" id="prodChips"></div>
         <div class="e-row r1">
-          <label class="f">Product<input class="inp" id="eProd" list="prodList" autocomplete="off" placeholder="Ring, Chain, Kada…"></label>
+          <label class="f">Product<input class="inp" id="eProd" list="prodList" autocomplete="off" placeholder="Jewellery"></label>
           <div class="f">Metal<div class="seg" id="metalSeg"></div></div>
         </div>
         <div class="e-row r4">
@@ -551,6 +552,7 @@ table.t td.r,table.t th.r{text-align:right}
         <label class="f">Next invoice no.<input class="inp" id="sInvN" type="number" min="1"></label>
         <label class="f">Default polish %<input class="inp" id="sPolDef" type="number" step="0.01"></label>
         <label class="f">Card charges %<input class="inp" id="sCardPct" type="number" step="0.01"></label>
+        <label class="f">Default product name<input class="inp" id="sDefProd"></label>
         <label class="f">Default diamond ₹/ct<input class="inp" id="sDiaDef" type="number" step="1"></label>
       </div>
     </div>
@@ -606,9 +608,9 @@ const METALS=[
 const M=k=>METALS.find(m=>m.k===k)||METALS[1];
 const PURITY={G24:.995,G22:.916,G18:.75,G14:.585};
 
-const DEFAULT_PRODUCTS=['Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
+const DEFAULT_PRODUCTS=['Jewellery','Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
 
-const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
+const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,defProd:'Jewellery',cardPct:0,diaDef:65000,fill:'1',
  terms:'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ : 1. ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਦੇ ਚਾਰਜ ਅਲਗ ਤੋਂ ਲੱਗਣਗੇ। 2. ਵਾਪਸੀ ਤੇ ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਨਹੀਂ ਮਿਲੇਗੀ। 3. ਡਾਇਮੰਡ ਦੇ ਸਮਾਨ ਦੀ ਵਾਪਸੀ ਤੇ ਪੈਸੇ 20% ਕੱਟ ਕੇ ਮਿਲਣਗੇ। 4. 50% ਐਡਵਾਂਸ ਦੇਣ ਨਾਲ ਹੀ ਉਸ ਦਿਨ ਦਾ ਰੇਟ ਪੱਕਾ ਹੋਵੇਗਾ (ਤਿੰਨ ਮਹੀਨੇ ਦੇ ਅੰਦਰ ਅੰਦਰ) 5. ਕਾਰਡ ਤੋਂ ਪੇਮੈਂਟ ਕਰਨ ਦੇ ਪੈਸੇ ਵੱਖਰੇ ਲੱਗਣਗੇ।',
  products:DEFAULT_PRODUCTS};
 
@@ -688,6 +690,7 @@ function ratesTodaySet(){return latestRates().date===todayISO()}
 if(!rateHist||!rateHist.length){rateHist=seedRates();store.set('rates',rateHist)}
 // upgrade older saved data: Italian silver rate and products
 if(rateHist.some(r=>r.ISIL==null)){rateHist.forEach(r=>{if(r.ISIL==null)r.ISIL=Math.round(r.SIL*1.25/100)*100});store.set('rates',rateHist)}
+if(!S.products.some(p=>p.toLowerCase()===String(S.defProd||'').toLowerCase())&&S.defProd){S.products.unshift(S.defProd);store.set('settings',S)}
 if(!S.products.some(p=>/italian/i.test(p))){S.products=S.products.concat(DEFAULT_PRODUCTS.filter(p=>/italian/i.test(p)));store.set('settings',S)}
 if(!bills){bills=seedBills();store.set('bills',bills)}
 
@@ -738,7 +741,7 @@ function calcItem(it){
   const dprice=Math.round(dct*drate);
   const labour=Math.round(num(it.labour));
   const amount=metalPrice+dprice+labour;
-  return{product:(it.product||'').trim()||'Item',metal:m.k,pcs,net,polishPct,polishWt,stone,wt,rate,metalPrice,hasDia:!!it.hasDia,dct,drate,dprice,labour,amount,huid:(it.huid||'').toUpperCase()};
+  return{product:(it.product||'').trim()||S.defProd||'Jewellery',metal:m.k,pcs,net,polishPct,polishWt,stone,wt,rate,metalPrice,hasDia:!!it.hasDia,dct,drate,dprice,labour,amount,huid:(it.huid||'').toUpperCase()};
 }
 function buildBill(b){
   const sub=b.items.reduce((s,i)=>s+i.amount,0);
@@ -791,7 +794,7 @@ function updateEntry(){
   $('#ePolW').textContent=m.gold?g3(it.polishWt)+' g':'—';$('#eWt').textContent=g3(it.wt)+' g';$('#eMetal').textContent=inr(it.metalPrice);$('#eDprice').textContent=inr(it.dprice);$('#eAmt').textContent=inr(it.amount);
 }
 function clearEntry(keepMetal){
-  $('#eProd').value='';$('#ePcs').value=1;$('#eNet').value='';$('#eStone').value='';$('#eLab').value='';$('#eHuid').value='';$('#eDct').value='';$('#eDrate').value=S.diaDef;
+  $('#eProd').value=S.defProd||'';$('#ePcs').value=1;$('#eNet').value='';$('#eStone').value='';$('#eLab').value='';$('#eHuid').value='';$('#eDct').value='';$('#eDrate').value=S.diaDef;
   $('#eHasDia').checked=false;entry.hasDia=false;$('#entry').classList.remove('has-dia');$('#eMore').open=false;
   if(!keepMetal)entry.metal='G22';$('#ePol').value='';setMetal(entry.metal);
   selIdx=-1;$('#entryTitle').textContent='Add item';$('#eAdd span').textContent='Add to bill';renderItems();renderChips();
@@ -799,14 +802,14 @@ function clearEntry(keepMetal){
 function addItem(){
   const raw=readEntry();
   if(!num(raw.net)&&!num(raw.dct)){toast('Enter the net weight first.');$('#eNet').focus();return}
-  if(!raw.product.trim()){toast('Choose or type a product name.');$('#eProd').focus();return}
+  if(!raw.product.trim())raw.product=S.defProd||'Jewellery';
   const it=calcItem(raw);
   if(it.wt<0){toast('Stone weight is more than the metal weight. Please check.');return}
   if(selIdx>=0)cur.items[selIdx]=it;else cur.items.push(it);
   rememberProduct(it.product);
   saveDraft();clearEntry(true);renderSummary();
   toast(selIdx>=0?'Item updated':'Added '+it.product+' · '+inr(it.amount));
-  $('#eProd').focus();
+  $('#eNet').focus();
 }
 function editItem(i){
   const it=cur.items[i];selIdx=i;
@@ -852,7 +855,8 @@ function setPay(m){cur.payMode=m;$$('#paySeg button').forEach(b=>b.setAttribute(
 function productUsage(){const c={};bills.forEach(b=>b.items.forEach(i=>c[i.product]=(c[i.product]||0)+1));return c}
 function renderChips(){
   const u=productUsage();const top=Object.keys(u).sort((a,b)=>u[b]-u[a]).slice(0,10);
-  const list=top.length?top:S.products.slice(0,10);
+  let list=top.length?top:S.products.slice(0,10);
+  if(S.defProd)list=[S.defProd].concat(list.filter(p=>p.toLowerCase()!==S.defProd.toLowerCase())).slice(0,10);
   $('#prodChips').innerHTML=list.map(p=>`<button type="button" class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join('');
   $$('#prodChips .chip').forEach(c=>c.onclick=()=>{$('#eProd').value=c.dataset.p;applyProductHints(c.dataset.p);$$('#prodChips .chip').forEach(x=>x.classList.toggle('on',x===c));$('#eNet').focus()});
   $('#prodList').innerHTML=S.products.map(p=>`<option value="${esc(p)}">`).join('');
@@ -900,8 +904,9 @@ function billHTML(b){
   const inv=b.type==='invoice';
   const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
   const rows=b.items.map((it,i)=>{const m=M(it.metal);
-    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?' · Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
-    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
+    const pw=m.gold?it.polishWt:0;
+    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}${pw?`<small class="pw">+ ${g3(pw)}</small>`:''}<small>${m.n}${m.gold?' Hallmark':''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?' · Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
+    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net+pw)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
   const T=(l,v)=>`<div class="tl"><span>${l}</span><span>${v}</span></div>`;
   let tot=T('Items Total',inr2(b.sub));
   if(b.discount)tot+=T('Discount','− '+inr2(b.discount));
@@ -922,7 +927,7 @@ function billHTML(b){
    <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div></div></div>
   <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:11mm">HSN</th>':''}<th style="width:15mm">Net Wt<br>(g)</th><th style="width:17mm">Rate</th><th style="width:22mm">Amount<br>(In Rs.)</th></tr></thead>
    <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td></tr>
-   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net,0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
+   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net+(M(i.metal).gold?i.polishWt:0),0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
   <div class="foot"><div>${leftFoot}</div><div>${tot}<div class="bill"><span>BILL AMOUNT</span><span>${inr2(b.total)}</span></div></div></div>
   <div class="words">Rupees ${words(b.total)} only</div>
   <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b><br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
@@ -999,7 +1004,7 @@ function csv(){const rows=[['Bill no','Type','Date','Customer','Mobile','Address
   download('manmohan-bills-'+todayISO()+'.csv',rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
 
 /* ================= Settings ================= */
-const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sAddr:'addr',sGstin:'gstin',sBank:'bank',sInvName:'invName',sInvDeals:'invDeals',sInvTerms:'invTerms',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
+const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sAddr:'addr',sGstin:'gstin',sBank:'bank',sInvName:'invName',sInvDeals:'invDeals',sInvTerms:'invTerms',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sDefProd:'defProd',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
 function loadSettings(){for(const id in SET_FIELDS)$('#'+id).value=S[SET_FIELDS[id]];$('#sProducts').value=S.products.join('\n')}
 function saveSettings(){for(const id in SET_FIELDS){let v=$('#'+id).value;if(['gstRate','estN','invN','polDef','cardPct','diaDef'].includes(SET_FIELDS[id]))v=num(v);S[SET_FIELDS[id]]=v}
   S.gstin=S.gstin.toUpperCase();S.estN=Math.max(1,Math.round(S.estN));S.invN=Math.max(1,Math.round(S.invN));
@@ -1026,6 +1031,7 @@ $('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();i
 ['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
 $('#eRate').addEventListener('input',()=>entryRateTouched=true);
 $('#eProd').addEventListener('change',()=>applyProductHints($('#eProd').value));
+$('#eProd').addEventListener('focus',e=>setTimeout(()=>e.target.select(),0));
 $('#eHasDia').onchange=()=>{entry.hasDia=$('#eHasDia').checked;$('#entry').classList.toggle('has-dia',entry.hasDia);if(entry.hasDia&&!$('#eDrate').value)$('#eDrate').value=S.diaDef;updateEntry()};
 $('#entry').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();addItem()}});
 $('#eAdd').onclick=addItem;$('#eClear').onclick=()=>clearEntry();
