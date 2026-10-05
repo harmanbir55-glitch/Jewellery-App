@@ -123,7 +123,7 @@ label.f span.u{font-weight:500;opacity:.8}
 .cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.6fr);align-items:end}
 .cust label.f{white-space:nowrap}
 .cust .gst{display:none}
-.is-inv .cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr)}
+.is-inv .cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr)}
 .is-inv .cust .gst{display:flex}
 
 /* Item entry */
@@ -255,7 +255,7 @@ table.t td.r,table.t th.r{text-align:right}
 .a5 .shop{text-align:center}
 .a5 .sname{font-family:Arial,"Helvetica Neue",sans-serif;font-weight:900;font-size:17pt;letter-spacing:.02em;line-height:1;white-space:nowrap;color:#111}
 .a5 .gov{font-weight:700;font-size:7.4pt;letter-spacing:.06em;margin-top:.8mm}
-.a5 .pa{font-family:var(--f-pa);color:var(--maroon);font-weight:700;font-size:9.5pt;line-height:1.1}
+.a5 .pa{margin-top:1mm;font-family:var(--f-pa);color:var(--maroon);font-weight:700;font-size:9.5pt;line-height:1.1}
 .a5 .deals{font-size:6.8pt}
 .a5 .lucky{font-weight:700;font-size:6.8pt;color:var(--maroon)}
 .a5 .addr{font-size:7.6pt;font-weight:700}
@@ -288,6 +288,7 @@ table.t td.r,table.t th.r{text-align:right}
 .a5 .words{border-top:1px solid #111;padding:1mm 2mm;font-weight:700;font-size:6.8pt;text-transform:uppercase}
 .a5 .tc{display:grid;grid-template-columns:1fr auto;gap:2mm;border-top:1px solid #111;padding:1.2mm 2mm 1.4mm;align-items:end}
 .a5 .tc .t{font-family:var(--f-pa);font-weight:500;font-size:6.6pt;line-height:1.3}
+.a5 .tc .t.en{font-family:Arial,sans-serif;font-size:6.4pt}
 .a5 .tc .t b{font-family:Arial,sans-serif;font-weight:800;font-size:7.4pt;text-decoration:underline}
 .a5 .sig{display:flex;gap:6mm;align-items:flex-end;font-size:7pt;font-weight:700;white-space:nowrap}
 .a5 .sig div{text-align:center}
@@ -396,6 +397,7 @@ table.t td.r,table.t th.r{text-align:right}
           <label class="f">Mobile<input class="inp" id="cPhone" inputmode="tel" autocomplete="off" placeholder="98xxxxxxxx"></label>
           <label class="f addr">Address / village<input class="inp" id="cAddr" autocomplete="off" placeholder="Baba Bakala"></label>
           <label class="f gst">Customer GSTIN<input class="inp" id="cGst" autocomplete="off" style="text-transform:uppercase"></label>
+          <label class="f gst">Customer PAN<input class="inp" id="cPan" autocomplete="off" maxlength="10" style="text-transform:uppercase"></label>
         </div>
         <datalist id="custList"></datalist>
       </div>
@@ -532,11 +534,12 @@ table.t td.r,table.t th.r{text-align:right}
         <label class="f">Mobile<input class="inp" id="sMob"></label>
         <label class="f">Punjabi line<input class="inp" id="sPa" style="font-family:var(--f-pa)"></label>
         <label class="f">Deals in<input class="inp" id="sDeals"></label>
-        <label class="f">Highlight line<input class="inp" id="sLucky"></label>
         <label class="f">Address<input class="inp" id="sAddr"></label>
         <label class="f">Shop GSTIN <span class="u">(printed on GST invoice only)</span><input class="inp" id="sGstin" style="text-transform:uppercase"></label>
         <label class="f">Shop PAN <span class="u">(GST invoice only)</span><input class="inp" id="sPan" style="text-transform:uppercase"></label>
-        <label class="f">Bank details <span class="u">(printed at the bottom)</span><input class="inp" id="sBank" placeholder="Bank name, A/C no., IFSC"></label>
+        <label class="f">Bank details <span class="u">(GST invoice)</span><input class="inp" id="sBank" placeholder="Bank name, A/C no., IFSC"></label>
+        <label class="f">Name on GST invoice<input class="inp" id="sInvName"></label>
+        <label class="f">Deals in line on GST invoice<input class="inp" id="sInvDeals"></label>
       </div>
     </div>
     <div class="card">
@@ -555,7 +558,8 @@ table.t td.r,table.t th.r{text-align:right}
     </div>
     <div class="card full">
       <h2>Terms printed at the bottom</h2>
-      <textarea class="inp" id="sTerms" rows="3" style="font-family:var(--f-pa)"></textarea>
+      <div class="grid"><label class="f">On estimates<textarea class="inp" id="sTerms" rows="3" style="font-family:var(--f-pa)"></textarea></label>
+      <label class="f">On GST invoices<textarea class="inp" id="sInvTerms" rows="3"></textarea></label></div>
     </div>
     <div class="card full">
       <h2>Product list <span class="sp hint" style="letter-spacing:0;text-transform:none">One per line. These appear as suggestions while billing.</span></h2>
@@ -606,11 +610,12 @@ const PURITY={G24:.995,G22:.916,G18:.75,G14:.585};
 
 const DEFAULT_PRODUCTS=['Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
 
-const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'',pan:'',bank:'',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
+const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',pan:'AZWPS6315F',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,cardPct:0,diaDef:65000,fill:'1',
  terms:'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ : 1. ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਦੇ ਚਾਰਜ ਅਲਗ ਤੋਂ ਲੱਗਣਗੇ। 2. ਵਾਪਸੀ ਤੇ ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਨਹੀਂ ਮਿਲੇਗੀ। 3. ਡਾਇਮੰਡ ਦੇ ਸਮਾਨ ਦੀ ਵਾਪਸੀ ਤੇ ਪੈਸੇ 20% ਕੱਟ ਕੇ ਮਿਲਣਗੇ। 4. 50% ਐਡਵਾਂਸ ਦੇਣ ਨਾਲ ਹੀ ਉਸ ਦਿਨ ਦਾ ਰੇਟ ਪੱਕਾ ਹੋਵੇਗਾ (ਤਿੰਨ ਮਹੀਨੇ ਦੇ ਅੰਦਰ ਅੰਦਰ) 5. ਕਾਰਡ ਤੋਂ ਪੇਮੈਂਟ ਕਰਨ ਦੇ ਪੈਸੇ ਵੱਖਰੇ ਲੱਗਣਗੇ।',
  products:DEFAULT_PRODUCTS};
 
 let S=Object.assign({},DEF_SETTINGS,store.get('settings',{}));
+['gstin','pan','bank','invName','invDeals','invTerms'].forEach(k=>{if(!S[k])S[k]=DEF_SETTINGS[k]});
 let bills=store.get('bills',null);
 let rateHist=store.get('rates',null); // [{date,G24,G22,G18,G14,SIL}]
 
@@ -753,7 +758,7 @@ function buildBill(b){
 /* ================= Billing state ================= */
 let cur=null;cur=store.get('draft',null)||newDraft();
 let selIdx=-1, entryRateTouched=false;
-function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
+function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:'',pan:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
 function saveDraft(){store.set('draft',cur)}
 let entry={metal:'G22',hasDia:false};
 
@@ -767,7 +772,7 @@ function renderBillHead(){
 }
 function loadForm(){
   setType(cur.type);$('#billDate').value=cur.date;
-  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;
+  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;$('#cPan').value=cur.customer.pan||'';
   $('#sDisc').value=cur.discount;$('#sExch').value=cur.exchange;$('#sPaid').value=cur.paid;
   setPay(cur.payMode);renderItems();renderSummary();
 }
@@ -826,7 +831,7 @@ function renderItems(){
 }
 function readBill(){
   cur.date=$('#billDate').value||todayISO();
-  cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase()};
+  cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase(),pan:$('#cPan').value.trim().toUpperCase()};
   cur.discount=$('#sDisc').value;cur.exchange=$('#sExch').value;cur.paid=$('#sPaid').value;
   return buildBill(cur);
 }
@@ -909,20 +914,20 @@ function billHTML(b){
   const pay=b.balance?'Credit':esc(b.payMode);
   const pad=(v,n)=>String(v).padStart(n);
   const gsum=inv?(b.gstMode==='igst'?`GST%    A.VALUE      IGST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.igst),9)}`:`GST%    A.VALUE      SGST      CGST   TOT GST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.sgst),9)} ${pad(inr2(b.cgst),9)} ${pad(inr2(b.sgst+b.cgst),9)}`):'';
-  const leftFoot=[S.bank?`<div style="font-weight:700;font-size:6.8pt">${esc(S.bank)}</div>`:'',gsum?`<div class="gsum">${gsum}</div>`:'',`<div class="kv" style="margin-top:1.2mm">${gw?`<span>Gold wt</span><b>${g3(gw)} g</b>`:''}${sw?`<span>Silver wt</span><b>${g3(sw)} g</b>`:''}<span>Payment</span><b>${esc(b.payMode)}${b.balance?` · Received ${inr(b.paid)} · Balance ${inr(b.balance)}`:''}</b></div>`].join('');
+  const leftFoot=[inv&&S.bank?`<div style="font-size:6.8pt"><b style="text-decoration:underline">Bank A/c. Details :</b><br><b>${esc(S.bank).replace(/ · /g,'<br>')}</b></div>`:'',gsum?`<div class="gsum">${gsum}</div>`:'',`<div class="kv" style="margin-top:1.2mm"><span>Payment</span><b>${esc(b.payMode)}${b.balance?` · Received ${inr(b.paid)} · Balance ${inr(b.balance)}`:''}</b></div>`].join('');
   return `<div class="a5"><div class="copy">${inv?'Original For Recipient/Buyer':''}</div><div class="box"><div class="wm">${logo({c:'#9a7a2e',fill:false})}</div>
   <div class="hd"><div class="h1"><div>${inv?`${S.gstin?'GSTIN : '+esc(S.gstin):''}${S.pan?'<br>PAN : '+esc(S.pan):''}`:`<span class="prop">${esc(S.prop)}</span>`}</div><div class="doc">${inv?'TAX INVOICE':'ESTIMATE'}</div><div class="rt">${esc(S.mob)}${inv?`<div class="prop" style="margin-top:.5mm">${esc(S.prop)}</div>`:''}</div></div>
-   <div class="h2">${logo({c:'#b1122d',fg:'#f3d9a0'})}<div class="shop"><div class="sname">${esc(S.shop.toUpperCase())}</div><div class="gov">GOVT. APPROVED SHOWROOM</div><div class="pa">${esc(S.pa)}</div><div class="deals">${esc(S.deals)}</div><div class="lucky">${esc(S.lucky)}</div><div class="addr">${esc(S.addr)}</div></div><div></div></div></div>
+   <div class="h2">${logo({c:'#b1122d',fg:'#f3d9a0'})}<div class="shop"><div class="sname">${esc((inv?S.invName:S.shop).toUpperCase())}</div>${inv?'':`<div class="pa">${esc(S.pa)}</div>`}<div class="deals">${esc(inv?S.invDeals:S.deals)}</div><div class="addr">${esc(S.addr.toUpperCase())}</div></div><div></div></div></div>
   <div class="row big"><div class="sp">${inv?`<span>Invoice No. &nbsp;${esc(b.no)}</span>`:'<span></span>'}<span>${pay}</span></div><div class="sp"><span>Dated</span><span>${b.date.split('-').reverse().join('/')}</span></div></div>
   <div class="row"><div><div class="lbl">Buyer's Name &amp; Address:-</div><div class="bname">${esc((b.customer.name||'Walk-in customer').toUpperCase())}</div><div style="font-size:7pt;min-height:3mm">${esc(b.customer.addr)}</div>
-    <div class="kv"><b>PHONE</b><span>${esc(b.customer.phone)}</span>${inv?`<b>GSTIN</b><span>${esc(b.customer.gstin)}</span><b>State Code/POS</b><span>03-PB</span>`:''}</div></div>
-   <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}${gw?`<b>Gold</b><span>${g3(gw)} g</span>`:''}${sw?`<b>Silver</b><span>${g3(sw)} g</span>`:''}</div></div></div>
+    <div class="kv"><b>PHONE</b><span>${esc(b.customer.phone)}</span>${inv?`<b>GSTIN</b><span>${esc(b.customer.gstin)}</span><b>PAN</b><span>${esc(b.customer.pan||'')}</span><b>State Code/POS</b><span>03-PB</span>`:''}</div></div>
+   <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div></div></div>
   <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:9mm">HSN</th>':''}<th style="width:11mm">Net Wt<br>(g)</th><th style="width:10mm">Polish<br>Wt</th><th style="width:10mm">Stone<br>Wt</th><th style="width:11mm">Weight<br>(g)</th><th style="width:12mm">Rate</th><th style="width:17mm">Amount<br>(In Rs.)</th></tr></thead>
    <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td><td></td><td></td><td></td></tr>
    <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net,0))}</td><td></td><td></td><td>${g3(gw+sw)}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
   <div class="foot"><div>${leftFoot}</div><div>${tot}<div class="bill"><span>BILL AMOUNT</span><span>${inr2(b.total)}</span></div></div></div>
   <div class="words">Rupees ${words(b.total)} only</div>
-  <div class="tc"><div class="t"><b>TERMS &amp; CONDITIONS :</b><br>${esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Receiver Signature</div><div class="for"><span>For ${esc(S.shop.toUpperCase())}</span><span>Authorised Signatory</span></div></div>`:''}</div>
+  <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b><br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
   </div><div class="bot"><span>E.&amp;O.E.</span><span>Page 1 of 1</span></div></div>`;
 }
 function preview(b,title){$('#pvBody').innerHTML=billHTML(b);$('#pvTitle').textContent=title||'A5 preview';$('#pvModal').hidden=false;$('#pvPrint').onclick=()=>{if(b.id){doPrint(b);}else{$('#pvModal').hidden=true;printAndNew()}}}
@@ -996,7 +1001,7 @@ function csv(){const rows=[['Bill no','Type','Date','Customer','Mobile','Address
   download('manmohan-bills-'+todayISO()+'.csv',rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
 
 /* ================= Settings ================= */
-const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sLucky:'lucky',sAddr:'addr',sGstin:'gstin',sPan:'pan',sBank:'bank',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
+const SET_FIELDS={sShop:'shop',sProp:'prop',sMob:'mob',sPa:'pa',sDeals:'deals',sAddr:'addr',sGstin:'gstin',sPan:'pan',sBank:'bank',sInvName:'invName',sInvDeals:'invDeals',sInvTerms:'invTerms',sGstRate:'gstRate',sGstMode:'gstMode',sEstP:'estP',sEstN:'estN',sInvP:'invP',sInvN:'invN',sPolDef:'polDef',sCardPct:'cardPct',sDiaDef:'diaDef',sTerms:'terms'};
 function loadSettings(){for(const id in SET_FIELDS)$('#'+id).value=S[SET_FIELDS[id]];$('#sProducts').value=S.products.join('\n')}
 function saveSettings(){for(const id in SET_FIELDS){let v=$('#'+id).value;if(['gstRate','estN','invN','polDef','cardPct','diaDef'].includes(SET_FIELDS[id]))v=num(v);S[SET_FIELDS[id]]=v}
   S.gstin=S.gstin.toUpperCase();S.pan=(S.pan||'').toUpperCase();S.estN=Math.max(1,Math.round(S.estN));S.invN=Math.max(1,Math.round(S.invN));
@@ -1017,7 +1022,7 @@ function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleDateString('e
 $$('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.p));
 $$('#typeSeg button').forEach(b=>b.onclick=()=>setType(b.dataset.t));
 $$('#paySeg button').forEach(b=>b.onclick=()=>setPay(b.dataset.m));
-['#billDate','#cName','#cPhone','#cAddr','#cGst','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
+['#billDate','#cName','#cPhone','#cAddr','#cGst','#cPan','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
 $('#cName').addEventListener('change',()=>{const n=$('#cName').value.trim();const p=bills.slice().reverse().find(b=>b.customer.name===n);if(p){if(!$('#cPhone').value)$('#cPhone').value=p.customer.phone;if(!$('#cAddr').value)$('#cAddr').value=p.customer.addr;if(!$('#cGst').value)$('#cGst').value=p.customer.gstin||'';renderSummary()}});
 $('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();if(ph.length<6)return;const p=bills.slice().reverse().find(b=>b.customer.phone===ph);if(p&&!$('#cName').value){$('#cName').value=p.customer.name;$('#cAddr').value=p.customer.addr;renderSummary();toast('Returning customer: '+p.customer.name)}});
 ['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
