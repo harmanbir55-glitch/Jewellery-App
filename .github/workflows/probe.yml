@@ -1,0 +1,24 @@
+name: Check PJ rates site
+on:
+  push:
+    branches: [rates-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Site scripts
+        run: |
+          set +e
+          curl -sS -m 30 http://www.pjgoldbullion.in/js/custom.js | head -8
+          echo "== message handler =="
+          curl -sS -m 30 http://www.pjgoldbullion.in/js/Liverate.js > lr.js
+          grep -n -E "\.on\(" lr.js
+          L=$(grep -n -E "on\(['\"]message" lr.js | head -1 | cut -d: -f1); echo "line $L"
+          [ -n "$L" ] && sed -n "${L},$((L+90))p" lr.js | grep -v -E "^\s*'\s*<|^\s*$" | cut -c1-220
+          true
+      - name: Browser test from another site
+        run: |
+          npm i --no-save playwright@1.47.2 >/dev/null
+          npx playwright install chromium >/dev/null
+          node .github/probe/cross.js
