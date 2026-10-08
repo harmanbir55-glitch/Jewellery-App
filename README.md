@@ -19,8 +19,8 @@ Open `index.html` in Chrome (Safari on iPhone). Everything is in that one file.
 
 ## Features
 
-- Daily Punjab rates (Gold 24K/22K/18K/14K, Silver, Italian Silver), filled in automatically while billing
-- Polish = net wt × polish % (gold only)
+- Live rates from PJ Gold Bullion (pjgoldbullion.in): today's 24K (995), 22K and Silver fill in by themselves when the app opens; 18K and 14K are worked out from 24K; every rate can still be changed by hand
+- Polish = net wt × polish % (gold only), 15% by default
 - Weight = net wt + polish wt − stone wt
 - Metal price = weight × rate, Diamond price = carat × rate per carat, Price = metal + diamond
 - Estimate and GST invoice (CGST + SGST or IGST), A5 print with the shop letterhead

@@ -111,6 +111,13 @@ label.f span.u{font-weight:500;opacity:.8}
 .rates .btn{border-color:rgba(255,255,255,.35);background:transparent;color:#fff}
 .rates .btn.pri{background:#fff;color:var(--orange-2);border-color:#fff}
 .rates a{color:#ffd9a8;font-size:12px}
+.pjlive{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;background:rgba(255,255,255,.07);border-radius:8px;padding:8px 10px}
+.pjlive:empty{display:none}
+.pjlive .dot{width:8px;height:8px;border-radius:50%;background:#ffd9a8;flex:none}
+.pjlive[data-st="live"] .dot{background:#5fd38d;box-shadow:0 0 0 3px rgba(95,211,141,.25)}
+.pjlive[data-st="down"] .dot{background:#ffb3a3}
+.pjlive .t{opacity:.75;font-size:12px}
+.pjlive .v{font-weight:700;color:#ffd9a8;font-variant-numeric:tabular-nums;flex:1 1 auto}
 .rate-edit{display:grid;gap:8px;grid-template-columns:repeat(6,minmax(0,1fr));align-items:end}
 .rate-edit>.btn,.rate-edit>.row{grid-column:1/-1;justify-self:start}
 .rate-edit .inp{background:#fff}
@@ -616,12 +623,13 @@ const PURITY={G24:.995,G22:.916,G18:.75,G14:.585};
 
 const DEFAULT_PRODUCTS=['Jewellery','Ring','Gents Ring','Ladies Ring','Chain','Necklace','Necklace Set','Rani Haar','Mangalsutra','Pendant','Locket','Earrings','Tops','Jhumka','Bali','Kada','Bangles','Kangan','Bracelet','Nose Pin','Nath','Maang Tikka','Payal','Bichhua (Toe Ring)','Kamarband','Gold Coin','Silver Coin','Gold Biscuit','Diamond Ring','Diamond Tops','Diamond Pendant','Diamond Set','Silver Glass','Silver Utensils','Italian Silver Chain','Italian Silver Bracelet','Italian Silver Ring','Italian Silver Payal','Lucky Stone Ring'];
 
-const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:8,defProd:'Jewellery',cardPct:0,diaDef:65000,fill:'1',
+const DEF_SETTINGS={shop:'Manmohan Jewellers',prop:'Prop. Shiv Pal Singh',mob:'(M) 78599-00002',pa:'ਬਾਬਾ ਬਕਾਲਾ ਵਾਲੇ',deals:'Deals in : All kinds of Gold (Hallmark 916), Diamond & Silver Ornaments',lucky:'LUCKY STONES ALSO AVAILABLE HERE',addr:'Main Bazar, Baba Bakala Sahib (Amritsar)',gstin:'03AZWPS6315F1Z2',bank:'HDFC BANK, Baba Bakala · A/C No.: 50200063641252 · IFS CODE: HDFC0003289',invName:'Manmohan Jeweller',invDeals:'Deals in : All kinds of Gold (Hallmark 916) & Silver Ornaments',invTerms:'1. All disputes subject to Gurdaspur jurisdiction only. 2. Interest @24% p.a. will be charged if the bill is not paid within 7 days. 3. Our responsibility ceases as soon as goods are delivered to the claimers. 4. Goods once sold will not be taken back or exchanged.',gstRate:3,gstMode:'split',estP:'EST-',estN:1,invP:'MJ/',invN:1,polDef:15,defProd:'Jewellery',cardPct:0,diaDef:65000,fill:'1',
  terms:'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ : 1. ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਦੇ ਚਾਰਜ ਅਲਗ ਤੋਂ ਲੱਗਣਗੇ। 2. ਵਾਪਸੀ ਤੇ ਲੇਬਰ ਅਤੇ ਪਾਲਿਸ਼ ਨਹੀਂ ਮਿਲੇਗੀ। 3. ਡਾਇਮੰਡ ਦੇ ਸਮਾਨ ਦੀ ਵਾਪਸੀ ਤੇ ਪੈਸੇ 20% ਕੱਟ ਕੇ ਮਿਲਣਗੇ। 4. 50% ਐਡਵਾਂਸ ਦੇਣ ਨਾਲ ਹੀ ਉਸ ਦਿਨ ਦਾ ਰੇਟ ਪੱਕਾ ਹੋਵੇਗਾ (ਤਿੰਨ ਮਹੀਨੇ ਦੇ ਅੰਦਰ ਅੰਦਰ) 5. ਕਾਰਡ ਤੋਂ ਪੇਮੈਂਟ ਕਰਨ ਦੇ ਪੈਸੇ ਵੱਖਰੇ ਲੱਗਣਗੇ।',
  products:DEFAULT_PRODUCTS};
 
 let S=Object.assign({},DEF_SETTINGS,store.get('settings',{}));
 ['gstin','bank','invName','invDeals','invTerms'].forEach(k=>{if(!S[k])S[k]=DEF_SETTINGS[k]});
+if(!S.pol15){if(+S.polDef===8)S.polDef=15;S.pol15=1;store.set('settings',S)} // polish default moved from 8% to 15%
 let bills=store.get('bills',null);
 let rateHist=store.get('rates',null); // [{date,G24,G22,G18,G14,SIL}]
 
@@ -705,17 +713,17 @@ const PJ_LINK=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'https://apps.ap
 function renderRates(){
   const r=latestRates(),prev=rateHist.length>1?rateHist[rateHist.length-2]:null;
   const isToday=ratesTodaySet();
-  let h=`<div class="head wide"><h2>Today's Punjab rates</h2><div class="date">${isToday?'Updated today, '+fmtDate(r.date):'Last updated '+fmtDate(r.date)}</div></div>`;
+  let h=`<div class="head wide"><h2>Today's Punjab rates</h2><div class="date">${isToday?'Updated today, '+fmtDate(r.date)+(r.src==='pj'?' · from PJ Gold Bullion'+(r.time?' at '+r.time:''):''):'Last updated '+fmtDate(r.date)}</div></div><div class="pjlive wide" id="pjLive"></div>`;
   if(rateEditing){
     h+=`<div class="rate-edit wide">${METALS.map(m=>`<label class="f">${m.n} <span class="u">₹/${m.unit}</span><input class="inp" type="number" id="re_${m.k}" value="${r[m.k]}" inputmode="decimal"></label>`).join('')}
     <button class="btn sm" id="reCalc" type="button">Work out 22K/18K/14K from 24K</button>
     <div class="row"><button class="btn pri sm" id="reSave">Save today's rates</button><button class="btn sm" id="reCancel">Cancel</button></div></div>`;
   }else{
-    if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. Check today's rate in the PJ Gold Bullion app and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
+    if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. They fill in from PJ Gold Bullion when the live rates load, or check the PJ app and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
     h+=METALS.map(m=>{const d=prev?r[m.k]-prev[m.k]:0;return `<div class="rate" data-k="${m.k}" title="Tap to change"><span class="k">${m.n}</span><span class="v">${inr(r[m.k])}</span><span class="u">per ${m.unit} · ₹${(r[m.k]/m.div).toLocaleString('en-IN',{maximumFractionDigits:2})}/g ${d?`<span class="chg ${d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d).toLocaleString('en-IN')}</span>`:''}</span></div>`}).join('');
-    h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="${PJ_LINK}" target="_blank" rel="noopener">Open PJ Gold Bullion rates ↗</a></div>`;
+    h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="${PJ_SITE}" target="_blank" rel="noopener">Open pjgoldbullion.in ↗</a></div>`;
   }
-  $('#rates').innerHTML=h;
+  $('#rates').innerHTML=h;renderPJ();
   const chip=$('#rateChip');
   if(chip){chip.className='ratechip'+(isToday?'':' warn');chip.textContent=isToday?'Today\'s rate: 22K '+inr(r.G22)+'/10 g':'Set today\'s rates';
     chip.onclick=()=>{if(!isToday){rateEditing=true;renderRates()}$('#ratesSec').scrollIntoView({behavior:'smooth',block:'start'});if(!isToday)setTimeout(()=>{const i=$('#re_G24');if(i){i.focus();i.select()}},350)}}
@@ -724,18 +732,86 @@ function renderRates(){
   on('#reEdit2',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
   $$('#rates .rate').forEach(el=>el.onclick=()=>{rateEditing=true;renderRates();const i=$('#re_'+el.dataset.k);i.focus();i.select()});
   on('#reCancel',()=>{rateEditing=false;renderRates()});
-  on('#reSame',()=>saveRates(Object.assign({},r)));
+  on('#reSame',()=>saveRates(Object.assign({},r,{src:'manual',time:''})));
   on('#reCalc',()=>{const g=num($('#re_G24').value);['G22','G18','G14'].forEach(k=>$('#re_'+k).value=Math.round(g*PURITY[k]/.995/10)*10)});
-  on('#reSave',()=>{const n={};METALS.forEach(m=>n[m.k]=num($('#re_'+m.k).value));if(METALS.some(m=>!n[m.k])){toast('Enter every rate before saving.');return}saveRates(n)});
+  on('#reSave',()=>{const n={src:'manual'};METALS.forEach(m=>n[m.k]=num($('#re_'+m.k).value));if(METALS.some(m=>!n[m.k])){toast('Enter every rate before saving.');return}saveRates(n)});
   $$('#rates .rate-edit input').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#reSave').click()}});
 }
-function saveRates(n){
+function saveRates(n,msg){
   n.date=todayISO();
   if(ratesTodaySet())rateHist[rateHist.length-1]=n;else rateHist.push(n);
   store.set('rates',rateHist);rateEditing=false;renderRates();
   // refresh rate in the entry form if it was the default
   if(!entryRateTouched)setEntryRate();updateEntry();
-  toast('Today\'s rates saved. New items will use them.');
+  toast(msg||'Today\'s rates saved. New items will use them.');
+}
+
+/* ================= Live rates from PJ Gold Bullion (pjgoldbullion.in) ================= */
+// The PJ website gets its rates over a live socket; the app listens to the same feed.
+// SELL rates are used: 24K = GOLD 995 WITH GST, 22K = 22CT GOLD JEWELLERY, Silver = SILVER (SILI) IMPORTED 30KG (per kg).
+// 18K and 14K are worked out from 24K by purity; Italian silver keeps its own rate.
+const PJ_SITE='http://www.pjgoldbullion.in/';
+const PJ={url:'https://sladmin.co.in:10001',client:'punjabbullion',lib:'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js',state:'off',live:null,time:'',day:''};
+function pjParse(list){
+  const rows=(list||[]).filter(x=>String(x.IsDisplay).toLowerCase()!=='false');
+  const find=re=>rows.find(x=>re.test(String(x.Symbol||'').toUpperCase()));
+  const sell=x=>{const v=x?parseFloat(String(x.Ask).replace(/,/g,'')):0;return isFinite(v)&&v>0?Math.round(v):0};
+  const o={G24:sell(find(/GOLD\s*995(?!.*READY)/)||find(/GOLD\s*99[59]/)),G22:sell(find(/22\s*C(?:T|ARAT)|22\s*K/)),SIL:sell(find(/SILVER.*30\s*KG/)||find(/SILVER/))};
+  return o.G24||o.G22||o.SIL?o:null;
+}
+function pjRates(){
+  const l=PJ.live,r=latestRates(),n={src:'pj',time:PJ.time};
+  n.G24=l.G24||r.G24;
+  n.G22=l.G22||Math.round(n.G24*PURITY.G22/.995/10)*10;
+  n.G18=Math.round(n.G24*PURITY.G18/.995/10)*10;
+  n.G14=Math.round(n.G24*PURITY.G14/.995/10)*10;
+  n.SIL=l.SIL||r.SIL;n.ISIL=r.ISIL;
+  return n;
+}
+function pjApply(auto){if(PJ.live)saveRates(pjRates(),auto?'Today\'s rates filled in from PJ Gold Bullion.':'Rates updated from PJ Gold Bullion.')}
+function pjNow(){return new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true})}
+function pjConnect(){
+  if(PJ.state!=='off')return;
+  PJ.state='connecting';renderPJ();
+  const down=()=>{if(PJ.state!=='live'||!PJ.live){PJ.state='down';renderPJ()}};
+  const go=()=>{
+    try{
+      // websocket only: the feed does not allow other websites to use the slower polling fallback
+      const sock=io(PJ.url,{transports:['websocket'],reconnectionDelay:3000,reconnectionDelayMax:30000});
+      sock.on('connect',()=>sock.emit('Client',PJ.client));
+      sock.on('message',d=>{
+        const o=pjParse(d&&d.Rate);if(!o)return;
+        PJ.live=o;PJ.time=pjNow();PJ.state='live';
+        // first live rates of the day fill today's rates, unless today's rates were typed by hand
+        if(PJ.day!==todayISO()&&!rateEditing){PJ.day=todayISO();const r=latestRates();if(!ratesTodaySet()||r.src==='pj'){pjApply(true);return}}
+        renderPJ();
+      });
+      sock.on('connect_error',down);
+      sock.on('disconnect',()=>{PJ.state='down';renderPJ()});
+      setTimeout(down,15000);
+    }catch(e){PJ.state='down';renderPJ()}
+  };
+  if(window.io)go();
+  else{const sc=document.createElement('script');sc.src=PJ.lib;sc.onload=go;sc.onerror=()=>{PJ.state='down';renderPJ()};document.head.appendChild(sc)}
+}
+function renderPJ(){
+  const el=$('#pjLive');if(!el)return;
+  const st=PJ.state==='live'?'live':PJ.state==='connecting'||PJ.state==='off'?'wait':'down';
+  if(el.dataset.st!==st){
+    el.dataset.st=st;
+    el.innerHTML=st==='live'
+      ?`<span class="dot"></span><b>PJ live</b> <span class="t" id="pjT"></span><span class="v" id="pjV"></span><button class="btn sm pri" id="pjUse" type="button">Use these rates</button>`
+      :st==='wait'?`<span class="dot"></span>Getting live rates from PJ Gold Bullion…`
+      :`<span class="dot"></span><span>PJ live rates can't be reached right now. Type today's rates with Change rates, or check the <a href="${PJ_LINK}" target="_blank" rel="noopener">PJ app ↗</a></span>`;
+    const b=$('#pjUse');if(b)b.onclick=()=>pjApply(false);
+  }
+  if(st==='live'){
+    const l=PJ.live;
+    $('#pjT').textContent=PJ.time;
+    $('#pjV').textContent=[l.G24?'995 Gold '+inr(l.G24):'',l.G22?'22CT '+inr(l.G22):'',l.SIL?'Silver '+inr(l.SIL)+'/kg':''].filter(Boolean).join(' · ');
+    const r=latestRates(),same=ratesTodaySet()&&r.src==='pj'&&r.G24===pjRates().G24&&r.G22===pjRates().G22&&r.SIL===pjRates().SIL;
+    $('#pjUse').hidden=same;
+  }
 }
 
 /* ================= Item calc ================= */
@@ -768,7 +844,7 @@ function buildBill(b){
 
 /* ================= Billing state ================= */
 let cur=null;cur=store.get('draft',null)||newDraft();
-let selIdx=-1, entryRateTouched=false;
+let selIdx=-1, entryRateTouched=false, polTouched=false;
 function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
 function saveDraft(){store.set('draft',cur)}
 let entry={metal:'G22',hasDia:false};
@@ -794,7 +870,7 @@ function renderMetalSeg(){$('#metalSeg').innerHTML=METALS.map(m=>`<button type="
 function setMetal(k){
   entry.metal=k;$$('#metalSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
   const m=M(k);$('#ePol').disabled=!m.gold;$('#entry').classList.toggle('no-pol',!m.gold);
-  if(!m.gold){$('#ePol').value=''}else if($('#ePol').value===''){$('#ePol').value=k==='G24'?0:S.polDef}
+  if(!m.gold){$('#ePol').value=''}else if(!polTouched||$('#ePol').value===''){$('#ePol').value=k==='G24'?0:S.polDef}
   $('#rateLbl').textContent='Rate ₹/'+m.unit;entryRateTouched=false;setEntryRate();updateEntry();
 }
 function setEntryRate(){$('#eRate').value=latestRates()[entry.metal]}
@@ -806,7 +882,7 @@ function updateEntry(){
 function clearEntry(keepMetal){
   $('#eProd').value=S.defProd||'';$('#ePcs').value=1;$('#eNet').value='';$('#eStone').value='';$('#eLab').value='';$('#eHuid').value='';$('#eDct').value='';$('#eDrate').value=S.diaDef;
   $('#eHasDia').checked=false;entry.hasDia=false;$('#entry').classList.remove('has-dia');$('#eMore').open=false;
-  if(!keepMetal)entry.metal='G22';$('#ePol').value='';setMetal(entry.metal);
+  if(!keepMetal)entry.metal='G22';$('#ePol').value='';polTouched=false;setMetal(entry.metal);
   selIdx=-1;$('#entryTitle').textContent='Add item';$('#eAdd span').textContent='Add to bill';renderItems();renderChips();
 }
 function addItem(){
@@ -824,7 +900,7 @@ function addItem(){
 function editItem(i){
   const it=cur.items[i];selIdx=i;
   $('#eProd').value=it.product;$('#ePcs').value=it.pcs;$('#eNet').value=it.net;$('#eStone').value=it.stone||'';$('#eLab').value=it.labour||'';$('#eHuid').value=it.huid||'';
-  entry.metal=it.metal;setMetal(it.metal);$('#ePol').value=M(it.metal).gold?it.polishPct:'';$('#eRate').value=it.rate;entryRateTouched=true;
+  entry.metal=it.metal;setMetal(it.metal);$('#ePol').value=M(it.metal).gold?it.polishPct:'';polTouched=true;$('#eRate').value=it.rate;entryRateTouched=true;
   entry.hasDia=it.hasDia;$('#eHasDia').checked=it.hasDia;$('#eMore').open=!!(it.hasDia||it.labour||it.huid||it.pcs>1);$('#entry').classList.toggle('has-dia',it.hasDia);$('#eDct').value=it.dct||'';$('#eDrate').value=it.drate||S.diaDef;
   updateEntry();$('#entryTitle').textContent='Edit item '+(i+1);$('#eAdd span').textContent='Update item';renderItems();
   $('#entry').scrollIntoView({behavior:'smooth',block:'start'});
@@ -874,7 +950,7 @@ function renderChips(){
 function applyProductHints(p){
   const s=p.toLowerCase();
   // remember last metal used for this product
-  for(let i=bills.length-1;i>=0;i--){const f=bills[i].items.find(x=>x.product.toLowerCase()===s);if(f){setMetal(f.metal);if(M(f.metal).gold)$('#ePol').value=f.polishPct;break}}
+  for(let i=bills.length-1;i>=0;i--){const f=bills[i].items.find(x=>x.product.toLowerCase()===s);if(f){setMetal(f.metal);break}}
   if(/italian/.test(s))setMetal('ISIL');
   else if(/silver|payal|bichhua|glass|utensil/.test(s)&&M(entry.metal).gold)setMetal('SIL');
   if(/coin|biscuit/.test(s)&&/gold/.test(s))setMetal('G24');
@@ -1039,6 +1115,7 @@ $$('#paySeg button').forEach(b=>b.onclick=()=>setPay(b.dataset.m));
 $('#cName').addEventListener('change',()=>{const n=$('#cName').value.trim();const p=bills.slice().reverse().find(b=>b.customer.name===n);if(p){if(!$('#cPhone').value)$('#cPhone').value=p.customer.phone;if(!$('#cAddr').value)$('#cAddr').value=p.customer.addr;if(!$('#cGst').value)$('#cGst').value=p.customer.gstin||'';renderSummary()}});
 $('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();if(ph.length<6)return;const p=bills.slice().reverse().find(b=>b.customer.phone===ph);if(p&&!$('#cName').value){$('#cName').value=p.customer.name;$('#cAddr').value=p.customer.addr;renderSummary();toast('Returning customer: '+p.customer.name)}});
 ['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
+$('#ePol').addEventListener('input',()=>{polTouched=true});
 $('#eRate').addEventListener('input',()=>entryRateTouched=true);
 $('#eProd').addEventListener('change',()=>applyProductHints($('#eProd').value));
 $('#eProd').addEventListener('focus',e=>setTimeout(()=>e.target.select(),0));
@@ -1067,7 +1144,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ================= Boot ================= */
-renderRates();renderMetalSeg();clearEntry();
+renderRates();renderMetalSeg();clearEntry();pjConnect();
 if(cur.items.length)selIdx=-1;
 loadForm();renderChips();renderCustList();sampleBanner();tick();setInterval(tick,30000);
 let startTab='bill';try{startTab=sessionStorage.getItem('mj_tab')||'bill'}catch(e){}
