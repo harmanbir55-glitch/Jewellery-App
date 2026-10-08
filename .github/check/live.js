@@ -1,7 +1,7 @@
 const pw = require('playwright');
 const URL = 'https://harmanbir55-glitch.github.io/Jewellery-App/';
 (async () => {
-  for (const name of ['chromium', 'webkit', 'firefox']) {
+  for (const name of (process.argv[2] ? [process.argv[2]] : ['chromium', 'webkit', 'firefox'])) {
     const b = await pw[name].launch();
     const p = await b.newPage();
     const errs = [];

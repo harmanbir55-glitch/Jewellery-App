@@ -3,19 +3,40 @@ on:
   push:
     branches: [rates-check]
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  mac:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Site and certificate
+      - name: Apple network stack
         run: |
           set +e
-          curl -sS -o /dev/null -w "pages %{http_code}\n" https://harmanbir55-glitch.github.io/Jewellery-App/
-          curl -sS https://harmanbir55-glitch.github.io/Jewellery-App/ | grep -c "pjConnect"
-          echo | openssl s_client -connect sladmin.co.in:10001 -servername sladmin.co.in -showcerts 2>/dev/null | grep -E "^ *[0-9] s:|i:|Verify return"
+          sw_vers
+          nscurl --help >/dev/null 2>&1 && echo "nscurl ok"
+          nscurl "https://sladmin.co.in:10001/socket.io/?EIO=4&transport=polling" ; echo "nscurl exit $?"
+          python3 - <<'PY'
+          import subprocess
+          PY
+          cat > t.swift <<'SW'
+          import Foundation
+          let sem = DispatchSemaphore(value: 0)
+          let u = URL(string: "https://sladmin.co.in:10001/socket.io/?EIO=4&transport=polling")!
+          URLSession.shared.dataTask(with: u) { d, r, e in
+            if let e = e { print("URLSession ERROR", e.localizedDescription) }
+            else { print("URLSession OK", (r as? HTTPURLResponse)?.statusCode ?? 0, String(data: d ?? Data(), encoding: .utf8)?.prefix(80) ?? "") }
+            sem.signal() }.resume()
+          sem.wait()
+          SW
+          swift t.swift
           true
-      - name: Browsers
+      - name: Safari engine
         run: |
           npm i --no-save playwright@1.47.2 >/dev/null
-          npx playwright install --with-deps chromium webkit firefox >/dev/null 2>&1
-          node .github/check/live.js
+          npx playwright install webkit >/dev/null 2>&1
+          node .github/check/live.js webkit
+      - name: Real Safari
+        run: |
+          set +e
+          sudo safaridriver --enable
+          npm i --no-save selenium-webdriver@4.25.0 >/dev/null
+          node .github/check/safari.js
+          true
