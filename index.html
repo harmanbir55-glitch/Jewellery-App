@@ -87,14 +87,16 @@ label.f span.u{font-weight:500;opacity:.8}
 .hint{font-size:12px;color:var(--muted)}
 
 /* ---------- Billing layout ---------- */
-.billing{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;gap:16px;align-items:start;max-width:1500px;margin:0 auto}
-.col-rates{position:sticky;top:76px}
+.billing{display:grid;gap:16px;max-width:1500px;margin:0 auto}
+.billtop{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+.col-rates{scroll-margin-top:80px}
 .col-sum{position:sticky;top:76px;display:grid;gap:12px}
 .main{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
 .main>*{min-width:0}
 
 /* Rates column */
-.rates{background:var(--green);color:#f6efdc;border-radius:var(--r);padding:14px;display:grid;gap:10px}
+.rates{background:var(--green);color:#f6efdc;border-radius:var(--r);padding:14px;display:grid;gap:10px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.rates .wide{grid-column:1/-1}
 .rates h2{margin:0;font-family:var(--f-display);font-size:16px;letter-spacing:.04em}
 .rates .date{font-size:12px;opacity:.85}
 .rate{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:2px 8px;padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.07);cursor:pointer;border:1px solid transparent}
@@ -109,7 +111,8 @@ label.f span.u{font-weight:500;opacity:.8}
 .rates .btn{border-color:rgba(255,255,255,.35);background:transparent;color:#fff}
 .rates .btn.pri{background:#fff;color:var(--orange-2);border-color:#fff}
 .rates a{color:#ffd9a8;font-size:12px}
-.rate-edit{display:grid;gap:8px}
+.rate-edit{display:grid;gap:8px;grid-template-columns:repeat(6,minmax(0,1fr));align-items:end}
+.rate-edit>.btn,.rate-edit>.row{grid-column:1/-1;justify-self:start}
 .rate-edit .inp{background:#fff}
 .rate-edit label.f{color:#e9e2cc}
 
@@ -118,6 +121,8 @@ label.f span.u{font-weight:500;opacity:.8}
 .billno{font-family:var(--f-display);font-size:20px;color:var(--green-ink)}
 .billno small{font-family:var(--f-body);font-size:12px;color:var(--muted);display:block;letter-spacing:.06em;text-transform:uppercase}
 .billhead .sp{margin-left:auto}
+.ratechip{border:1px solid var(--line-2);background:var(--green-soft);color:var(--green-ink);border-radius:99px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.ratechip.warn{background:var(--orange);border-color:var(--orange);color:#fff}
 .editing{background:var(--orange-soft);color:var(--orange-2);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700}
 
 .cust{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.6fr);align-items:end}
@@ -308,10 +313,8 @@ table.t td.r,table.t th.r{text-align:right}
 
 /* ---------- Responsive ---------- */
 @media (max-width:1180px){
-  .billing{grid-template-columns:minmax(0,1fr) 320px}
-  .col-rates{grid-column:1/-1;position:static}
-  .rates{grid-template-columns:repeat(6,minmax(0,1fr));align-items:center}
-  .rates .wide{grid-column:1/-1}
+  .billtop{grid-template-columns:minmax(0,1fr) 320px}
+  .rates,.rate-edit{grid-template-columns:repeat(3,minmax(0,1fr))}
   .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
   .charts .c4{grid-column:span 6}.charts .c8{grid-column:span 12}
 }
@@ -324,12 +327,13 @@ table.t td.r,table.t th.r{text-align:right}
   .tab{flex-direction:column;gap:2px;font-size:11px;padding:6px 10px;flex:1}
   .tab svg{width:21px;height:21px}
   .page{padding:12px 16px 150px}
-  .billing{grid-template-columns:minmax(0,1fr)}
+  .billtop{grid-template-columns:minmax(0,1fr)}
   .col-sum{position:static}
   .rates{display:flex;flex-wrap:wrap;padding:12px;gap:8px}
   .rates>*{flex:1 1 100%}
   .rates>.rate{flex:1 1 calc(50% - 8px);padding:8px 9px}
   .rates .rate .v{font-size:16px}
+  .rate-edit{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cust,.is-inv .cust{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .cust .addr{grid-column:1/-1}
   .r1{grid-template-columns:minmax(0,1fr)}
@@ -375,11 +379,7 @@ table.t td.r,table.t th.r{text-align:right}
 <!-- ================= PAGE 1: BILLING ================= -->
 <section class="page on" id="p-bill">
   <div class="billing" id="billing">
-    <!-- Rates column -->
-    <aside class="col-rates">
-      <div class="rates" id="rates"></div>
-    </aside>
-
+   <div class="billtop">
     <!-- Main -->
     <div class="main">
       <div class="card">
@@ -390,6 +390,7 @@ table.t td.r,table.t th.r{text-align:right}
           </div>
           <div class="billno"><small id="billLbl">Estimate no.</small><span id="billNo">EST-0001</span></div>
           <span class="editing" id="editingTag" hidden>Editing saved bill</span>
+          <button type="button" class="ratechip" id="rateChip"></button>
           <label class="f sp" style="flex-direction:row;align-items:center;gap:8px">Date <input type="date" class="inp" id="billDate" style="width:auto"></label>
         </div>
         <div class="grid cust" style="margin-top:12px">
@@ -479,6 +480,12 @@ table.t td.r,table.t th.r{text-align:right}
         </div>
         <button class="btn ghost danger" id="btnNew">Discard and start fresh</button>
       </div>
+    </aside>
+
+   </div>
+    <!-- Today's rates (bottom) -->
+    <aside class="col-rates" id="ratesSec">
+      <div class="rates" id="rates"></div>
     </aside>
   </div>
 </section>
@@ -694,6 +701,7 @@ if(!S.products.some(p=>/italian/i.test(p))){S.products=S.products.concat(DEFAULT
 if(!bills){bills=seedBills();store.set('bills',bills)}
 
 let rateEditing=false;
+const PJ_LINK=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'https://apps.apple.com/in/app/pj-gold-bullion/id1466761389':'https://play.google.com/store/apps/details?id=com.PJGoldBullion';
 function renderRates(){
   const r=latestRates(),prev=rateHist.length>1?rateHist[rateHist.length-2]:null;
   const isToday=ratesTodaySet();
@@ -703,11 +711,14 @@ function renderRates(){
     <button class="btn sm" id="reCalc" type="button">Work out 22K/18K/14K from 24K</button>
     <div class="row"><button class="btn pri sm" id="reSave">Save today's rates</button><button class="btn sm" id="reCancel">Cancel</button></div></div>`;
   }else{
-    if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. Check the market rate and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
+    if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. Check today's rate in the PJ Gold Bullion app and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
     h+=METALS.map(m=>{const d=prev?r[m.k]-prev[m.k]:0;return `<div class="rate" data-k="${m.k}" title="Tap to change"><span class="k">${m.n}</span><span class="v">${inr(r[m.k])}</span><span class="u">per ${m.unit} · ₹${(r[m.k]/m.div).toLocaleString('en-IN',{maximumFractionDigits:2})}/g ${d?`<span class="chg ${d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d).toLocaleString('en-IN')}</span>`:''}</span></div>`}).join('');
-    h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="https://www.google.com/search?q=gold+rate+today+amritsar+punjab" target="_blank" rel="noopener">Check market rate ↗</a></div>`;
+    h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="${PJ_LINK}" target="_blank" rel="noopener">Open PJ Gold Bullion rates ↗</a></div>`;
   }
   $('#rates').innerHTML=h;
+  const chip=$('#rateChip');
+  if(chip){chip.className='ratechip'+(isToday?'':' warn');chip.textContent=isToday?'Today\'s rate: 22K '+inr(r.G22)+'/10 g':'Set today\'s rates';
+    chip.onclick=()=>{if(!isToday){rateEditing=true;renderRates()}$('#ratesSec').scrollIntoView({behavior:'smooth',block:'start'});if(!isToday)setTimeout(()=>{const i=$('#re_G24');if(i){i.focus();i.select()}},350)}}
   const on=(id,f)=>{const el=$(id);if(el)el.onclick=f};
   on('#reEdit',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
   on('#reEdit2',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
@@ -904,8 +915,8 @@ function billHTML(b){
   const gw=b.items.filter(i=>M(i.metal).gold).reduce((s,i)=>s+i.wt,0),sw=b.items.filter(i=>!M(i.metal).gold).reduce((s,i)=>s+i.wt,0);
   const rows=b.items.map((it,i)=>{const m=M(it.metal);
     const pw=m.gold?it.polishWt:0;
-    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${pw?' · '+g3(it.net)+' + '+g3(pw):''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?'<br>Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
-    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.net+pw)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
+    const desc=`${esc(it.product)}${it.pcs>1?' ('+it.pcs+' pcs)':''}<small>${m.n}${m.gold?' Hallmark':''}${(pw||it.stone)?' · '+g3(it.net)+(pw?' + '+g3(pw):'')+(it.stone?' - '+g3(it.stone):''):''}${it.huid?' · HUID '+esc(it.huid):''}${it.hasDia?'<br>Diamond '+it.dct+' ct @ '+inr(it.drate)+' = '+inr2(it.dprice):''}${it.labour?' · Labour '+inr2(it.labour):''}</small>`;
+    return `<tr><td>${i+1}</td><td class="d">${desc}</td>${inv?'<td class="c">7113</td>':''}<td>${g3(it.wt)}</td><td>${Math.round(it.rate).toLocaleString('en-IN')}<small>/${m.unit}</small></td><td>${inr2(it.amount)}</td></tr>`}).join('');
   const T=(l,v)=>`<div class="tl"><span>${l}</span><span>${v}</span></div>`;
   let tot=T('Items Total',inr2(b.sub));
   if(b.discount)tot+=T('Discount','− '+inr2(b.discount));
@@ -926,7 +937,7 @@ function billHTML(b){
    <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div></div></div>
   <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:11mm">HSN</th>':''}<th style="width:15mm">Net Wt<br>(g)</th><th style="width:17mm">Rate</th><th style="width:22mm">Amount<br>(In Rs.)</th></tr></thead>
    <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td></tr>
-   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.net+(M(i.metal).gold?i.polishWt:0),0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
+   <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.wt,0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
   <div class="foot"><div>${leftFoot}</div><div>${tot}<div class="bill"><span>BILL AMOUNT</span><span>${inr2(b.total)}</span></div></div></div>
   <div class="words">Rupees ${words(b.total)} only</div>
   <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b><br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
