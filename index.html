@@ -162,6 +162,17 @@ label.f span.u{font-weight:500;opacity:.8}
 .entry:not(.has-dia) .dia{display:none!important}
 .entry.no-pol .gonly{opacity:.45}
 .toggle.inp{display:flex;align-items:center;font-weight:600;color:var(--ink);font-size:14px}
+details.xtra>summary{list-style:none;cursor:pointer}
+details.xtra>summary::-webkit-details-marker{display:none}
+details.xtra>summary h2{margin:0}
+details.xtra>summary h2::before{content:"+";width:12px}
+details.xtra[open]>summary h2::before{content:"−"}
+details.xtra>summary .muted{letter-spacing:0;text-transform:none;font-weight:600}
+details.xtra .hint{margin:8px 0 10px}
+.xg{grid-template-columns:repeat(4,minmax(0,1fr))}
+.xg .invf{display:none}
+.is-inv .xg .invf{display:flex}
+.xg .xirn{grid-column:span 2}
 details.more{margin-top:12px;border-top:1px dashed var(--line-2);padding-top:10px}
 details.more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--green);list-style:none}
 details.more summary::before{content:"+ "}
@@ -279,6 +290,15 @@ table.t td.r,table.t th.r{text-align:right}
 .a5 .lbl{font-size:6.4pt;font-weight:700;text-decoration:underline}
 .a5 .kv{display:grid;grid-template-columns:auto 1fr;gap:.3mm 2mm;font-size:6.8pt;margin-top:.6mm}
 .a5 .kv b{font-weight:700}
+.a5 .rside{display:flex;flex-direction:column}
+.a5 .kv.trn{margin-top:1mm;font-size:6.4pt;gap:.2mm 2mm}
+.a5 .kv.trn b{text-transform:none}
+.a5 .kv.brk{margin-top:auto;padding-top:1mm}
+.a5 .einv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.8mm 2mm;align-items:center;margin-top:1.2mm;font-size:6.4pt}
+.a5 .einv span{background:#cfcfcf;font-weight:800;text-decoration:underline;padding:.4mm 1.2mm;white-space:nowrap}
+.a5 .einv b{font-weight:600;word-break:break-all}
+.a5 .einv b.irn{font-size:5.6pt;line-height:1.2}
+.a5 .tc .t b.rcm{margin-left:8mm}
 .a5 .bname{font-weight:700;font-size:8.4pt;margin-top:.6mm}
 .a5 .items{flex:1;min-height:0;display:flex;position:relative}
 .a5 table{width:100%;height:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:7.2pt}
@@ -343,6 +363,8 @@ table.t td.r,table.t th.r{text-align:right}
   .rate-edit{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cust,.is-inv .cust{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .cust .addr{grid-column:1/-1}
+  .xg{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .xg .xirn{grid-column:1/-1}
   .r1{grid-template-columns:minmax(0,1fr)}
   .r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .r1 .seg{display:flex}.r1 .seg button{flex:1;padding:8px 4px}
@@ -452,6 +474,21 @@ table.t td.r,table.t th.r{text-align:right}
         <h2>Items on this bill <span class="sp muted" id="itemCount" style="letter-spacing:0;text-transform:none;font-weight:600"></span></h2>
         <div class="items" id="items"></div>
       </div>
+
+      <details class="card xtra" id="xtra">
+        <summary><h2>Transport &amp; e-invoice details <span class="muted">(optional)</span></h2></summary>
+        <p class="hint">Fill these only when you need them. Whatever you fill in prints on the bill.</p>
+        <div class="grid xg">
+          <label class="f">Transport<input class="inp" id="xTransport" autocomplete="off"></label>
+          <label class="f">G.R. No.<input class="inp" id="xGrNo" autocomplete="off"></label>
+          <label class="f">GR dated<input class="inp" id="xGrDate" type="date"></label>
+          <label class="f">Freight<input class="inp" id="xFreight" autocomplete="off"></label>
+          <label class="f">Broker<input class="inp" id="xBroker" autocomplete="off"></label>
+          <label class="f invf">E-Way Ref. No.<input class="inp" id="xEway" autocomplete="off"></label>
+          <label class="f invf">E-Invoice ACK No.<input class="inp" id="xAck" autocomplete="off"></label>
+          <label class="f invf xirn">E-Invoice IRN No.<input class="inp" id="xIrn" autocomplete="off"></label>
+        </div>
+      </details>
     </div>
 
     <!-- Summary -->
@@ -707,6 +744,8 @@ if(rateHist.some(r=>r.ISIL==null)){rateHist.forEach(r=>{if(r.ISIL==null)r.ISIL=M
 if(!S.products.some(p=>p.toLowerCase()===String(S.defProd||'').toLowerCase())&&S.defProd){S.products.unshift(S.defProd);store.set('settings',S)}
 if(!S.products.some(p=>/italian/i.test(p))){S.products=S.products.concat(DEFAULT_PRODUCTS.filter(p=>/italian/i.test(p)));store.set('settings',S)}
 if(!bills){bills=seedBills();store.set('bills',bills)}
+// every bill needs an id so View / Edit / Copy / Delete can find it (older sample bills had none)
+if(bills.some(b=>!b.id)){bills.forEach((b,i)=>{if(!b.id)b.id='s'+i.toString(36)+Math.random().toString(36).slice(2,6)});store.set('bills',bills)}
 
 let rateEditing=false;
 const PJ_LINK=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'https://apps.apple.com/in/app/pj-gold-bullion/id1466761389':'https://play.google.com/store/apps/details?id=com.PJGoldBullion';
@@ -845,7 +884,8 @@ function buildBill(b){
 /* ================= Billing state ================= */
 let cur=null;cur=store.get('draft',null)||newDraft();
 let selIdx=-1, entryRateTouched=false, polTouched=false;
-function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:''}}
+function newDraft(type){return{id:null,type:type||(cur&&cur.type)||'estimate',date:todayISO(),customer:{name:'',phone:'',addr:'',gstin:''},items:[],discount:'',exchange:'',payMode:'Cash',paid:'',extra:{}}}
+const XTRA={xTransport:'transport',xGrNo:'grNo',xGrDate:'grDate',xFreight:'freight',xBroker:'broker',xEway:'eway',xAck:'ack',xIrn:'irn'};
 function saveDraft(){store.set('draft',cur)}
 let entry={metal:'G22',hasDia:false};
 
@@ -858,9 +898,12 @@ function renderBillHead(){
   $('#mLbl').textContent=(cur.type==='invoice'?'Invoice':'Estimate')+' total';
 }
 function loadForm(){
-  setType(cur.type);$('#billDate').value=cur.date;
-  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin;
+  // fill the inputs before anything re-reads the form, or the bill's own details get overwritten
+  $('#billDate').value=cur.date;
+  $('#cName').value=cur.customer.name;$('#cPhone').value=cur.customer.phone;$('#cAddr').value=cur.customer.addr;$('#cGst').value=cur.customer.gstin||'';
   $('#sDisc').value=cur.discount;$('#sExch').value=cur.exchange;$('#sPaid').value=cur.paid;
+  const x=cur.extra||{};for(const id in XTRA)$('#'+id).value=x[XTRA[id]]||'';$('#xtra').open=Object.keys(x).length>0;
+  setType(cur.type);
   setPay(cur.payMode);renderItems();renderSummary();
 }
 
@@ -920,6 +963,7 @@ function readBill(){
   cur.date=$('#billDate').value||todayISO();
   cur.customer={name:$('#cName').value.trim(),phone:$('#cPhone').value.trim(),addr:$('#cAddr').value.trim(),gstin:$('#cGst').value.trim().toUpperCase()};
   cur.discount=$('#sDisc').value;cur.exchange=$('#sExch').value;cur.paid=$('#sPaid').value;
+  cur.extra={};for(const id in XTRA){const v=$('#'+id).value.trim();if(v)cur.extra[XTRA[id]]=v}
   return buildBill(cur);
 }
 function renderSummary(){
@@ -1001,22 +1045,25 @@ function billHTML(b){
   if(b.exchange)tot+=T('Old Gold / Exchange','− '+inr2(b.exchange));
   if(Math.abs(b.roundOff)>=.005)tot+=T('Round Off',(b.roundOff>0?'+':'')+b.roundOff.toFixed(2));
   const pay=b.balance?'Credit':esc(b.payMode);
+  const x=b.extra||{},dmy=d=>d?d.split('-').reverse().join('/'):'';
+  const trans=(x.transport||x.grNo||x.grDate||x.freight||x.broker)?`<div class="kv trn"><b>TRANSPORT</b><span>${esc(x.transport||'')}</span><b>G.R.No.</b><span>${esc(x.grNo||'')}</span><b>GR Dated</b><span>${dmy(x.grDate)}</span><b>Freight</b><span>${esc(x.freight||'')}</span></div><div class="kv brk"><b>Broker :</b><span>${esc(x.broker||'')}</span></div>`:'';
+  const einv=inv&&(x.eway||x.ack||x.irn)?`<div class="einv"><span>E-Way Ref.No.</span><b>${esc(x.eway||'')}</b><span>E-Invoice ACK No.</span><b>${esc(x.ack||'')}</b><span>E-Invoice IRN No.</span><b class="irn">${esc(x.irn||'')}</b></div>`:'';
   const pad=(v,n)=>String(v).padStart(n);
   const gsum=inv?(b.gstMode==='igst'?`GST%    A.VALUE      IGST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.igst),9)}`:`GST%    A.VALUE      SGST      CGST   TOT GST\nTOTAL= ${pad(inr2(b.taxable),10)} ${pad(inr2(b.sgst),9)} ${pad(inr2(b.cgst),9)} ${pad(inr2(b.sgst+b.cgst),9)}`):'';
-  const leftFoot=[inv&&S.bank?`<div style="font-size:6.8pt"><b style="text-decoration:underline">Bank A/c. Details :</b><br><b>${esc(S.bank).replace(/ · /g,'<br>')}</b></div>`:'',gsum?`<div class="gsum">${gsum}</div>`:'',`<div class="kv" style="margin-top:1.2mm"><span>Payment</span><b>${esc(b.payMode)}${b.balance?` · Received ${inr(b.paid)} · Balance ${inr(b.balance)}`:''}</b></div>`].join('');
+  const leftFoot=[inv&&S.bank?`<div style="font-size:6.8pt"><b style="text-decoration:underline">Bank A/c. Details :</b><br><b>${esc(S.bank).replace(/ · /g,'<br>')}</b></div>`:'',einv,gsum?`<div class="gsum">${gsum}</div>`:'',`<div class="kv" style="margin-top:1.2mm"><span>Payment</span><b>${esc(b.payMode)}${b.balance?` · Received ${inr(b.paid)} · Balance ${inr(b.balance)}`:''}</b></div>`].join('');
   return `<div class="a5"><div class="copy">${inv?'Original For Recipient/Buyer':''}</div><div class="box"><div class="wm">${logo({c:'#9a7a2e',fill:false})}</div>
   <div class="hd"><div class="h1"><div>${inv?`${S.gstin?'GSTIN : '+esc(S.gstin):''}`:`<span class="prop">${esc(S.prop)}</span>`}</div><div class="doc">${inv?'TAX INVOICE':'ESTIMATE'}</div><div class="rt">${esc(S.mob)}${inv?`<div class="prop" style="margin-top:.5mm">${esc(S.prop)}</div>`:''}</div></div>
    <div class="h2">${logo({c:'#b1122d',fg:'#f3d9a0'})}<div class="shop"><div class="sname">${esc((inv?S.invName:S.shop).toUpperCase())}</div>${inv?'':`<div class="pa">${esc(S.pa)}</div>`}<div class="deals">${esc(inv?S.invDeals:S.deals)}</div><div class="addr">${esc(S.addr.toUpperCase())}</div></div><div></div></div></div>
   <div class="row big"><div class="sp">${inv?`<span>Invoice No. &nbsp;${esc(b.no)}</span>`:'<span></span>'}<span>${pay}</span></div><div class="sp"><span>Dated</span><span>${b.date.split('-').reverse().join('/')}</span></div></div>
   <div class="row"><div><div class="lbl">Buyer's Name &amp; Address:-</div><div class="bname">${esc((b.customer.name||'Walk-in customer').toUpperCase())}</div><div style="font-size:7pt;min-height:3mm">${esc(b.customer.addr)}</div>
     <div class="kv"><b>PHONE</b><span>${esc(b.customer.phone)}</span>${inv?`<b>GSTIN</b><span>${esc(b.customer.gstin)}</span><b>State Code/POS</b><span>03-PB</span>`:''}</div></div>
-   <div><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div></div></div>
+   <div class="rside"><div class="kv" style="margin-top:0"><b>Payment</b><span>${esc(b.payMode)}</span>${b.balance?`<b>Received</b><span>${inr(b.paid)}</span><b>Balance</b><span>${inr(b.balance)}</span>`:''}</div>${trans}</div></div>
   <div class="items"><table><thead><tr><th style="width:5mm">Sr.<br>No</th><th>Description of Goods</th>${inv?'<th style="width:11mm">HSN</th>':''}<th style="width:15mm">Net Wt<br>(g)</th><th style="width:17mm">Rate</th><th style="width:22mm">Amount<br>(In Rs.)</th></tr></thead>
    <tbody>${rows}<tr class="sp"><td></td><td></td>${inv?'<td></td>':''}<td></td><td></td><td></td></tr>
    <tr class="tt"><td></td><td style="text-align:right">Total</td>${inv?'<td></td>':''}<td>${g3(b.items.reduce((s,i)=>s+i.wt,0))}</td><td></td><td>${inr2(b.sub)}</td></tr></tbody></table></div>
   <div class="foot"><div>${leftFoot}</div><div>${tot}<div class="bill"><span>BILL AMOUNT</span><span>${inr2(b.total)}</span></div></div></div>
   <div class="words">Rupees ${words(b.total)} only</div>
-  <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b><br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
+  <div class="tc"><div class="t${inv?' en':''}"><b>TERMS &amp; CONDITIONS :</b>${inv?'<b class="rcm">RCM : N</b>':''}<br>${inv?esc(S.invTerms):esc(S.terms.replace(/^ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ\s*:\s*/,''))}</div>${inv?`<div class="sig"><div class="ln">Customer Signature</div><div class="for"><span>For ${esc(S.invName.toUpperCase())}</span><span>Auth. Signatory</span></div></div>`:''}</div>
   </div><div class="bot"><span>E.&amp;O.E.</span><span>Page 1 of 1</span></div></div>`;
 }
 function preview(b,title){$('#pvBody').innerHTML=billHTML(b);$('#pvTitle').textContent=title||'A5 preview';$('#pvModal').hidden=false;$('#pvPrint').onclick=()=>{if(b.id){doPrint(b);}else{$('#pvModal').hidden=true;printAndNew()}}}
@@ -1111,7 +1158,7 @@ function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleDateString('e
 $$('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.p));
 $$('#typeSeg button').forEach(b=>b.onclick=()=>setType(b.dataset.t));
 $$('#paySeg button').forEach(b=>b.onclick=()=>setPay(b.dataset.m));
-['#billDate','#cName','#cPhone','#cAddr','#cGst','#sDisc','#sExch','#sPaid'].forEach(s=>$(s).addEventListener('input',renderSummary));
+['#billDate','#cName','#cPhone','#cAddr','#cGst','#sDisc','#sExch','#sPaid'].concat(Object.keys(XTRA).map(k=>'#'+k)).forEach(s=>$(s).addEventListener('input',renderSummary));
 $('#cName').addEventListener('change',()=>{const n=$('#cName').value.trim();const p=bills.slice().reverse().find(b=>b.customer.name===n);if(p){if(!$('#cPhone').value)$('#cPhone').value=p.customer.phone;if(!$('#cAddr').value)$('#cAddr').value=p.customer.addr;if(!$('#cGst').value)$('#cGst').value=p.customer.gstin||'';renderSummary()}});
 $('#cPhone').addEventListener('change',()=>{const ph=$('#cPhone').value.trim();if(ph.length<6)return;const p=bills.slice().reverse().find(b=>b.customer.phone===ph);if(p&&!$('#cName').value){$('#cName').value=p.customer.name;$('#cAddr').value=p.customer.addr;renderSummary();toast('Returning customer: '+p.customer.name)}});
 ['#ePcs','#eNet','#ePol','#eStone','#eRate','#eLab','#eDct','#eDrate','#eProd','#eHuid'].forEach(s=>$(s).addEventListener('input',updateEntry));
