@@ -10,12 +10,15 @@ jobs:
       - name: Site scripts
         run: |
           set +e
-          echo "== Liverate.js =="; curl -sS -m 30 http://www.pjgoldbullion.in/js/Liverate.js | head -c 20000; echo
-          echo "== custom.js socket lines =="; curl -sS -m 30 http://www.pjgoldbullion.in/js/custom.js | grep -n -i -E "socket|emit|\.on\(|io\(|room|client" | cut -c1-400 | head -80
-          echo "== CORS check =="
-          curl -sS -m 20 -D - -o body.txt -H "Origin: https://harmanbir55-glitch.github.io" "https://sladmin.co.in:10001/socket.io/?EIO=4&transport=polling"; cat body.txt; echo
-          curl -sS -m 20 -D - -o /dev/null -X OPTIONS -H "Origin: https://harmanbir55-glitch.github.io" -H "Access-Control-Request-Method: GET" "https://sladmin.co.in:10001/socket.io/?EIO=4&transport=polling"
-      - name: Live client test
+          curl -sS -m 30 http://www.pjgoldbullion.in/js/custom.js | head -8
+          echo "== message handler =="
+          curl -sS -m 30 http://www.pjgoldbullion.in/js/Liverate.js > lr.js
+          grep -n -E "\.on\(" lr.js
+          L=$(grep -n -E "on\(['\"]message" lr.js | head -1 | cut -d: -f1); echo "line $L"
+          [ -n "$L" ] && sed -n "${L},$((L+90))p" lr.js | grep -v -E "^\s*'\s*<|^\s*$" | cut -c1-220
+          true
+      - name: Browser test from another site
         run: |
-          npm i --no-save socket.io-client@4.7.5 >/dev/null
-          node .github/probe/sock.js
+          npm i --no-save playwright@1.47.2 >/dev/null
+          npx playwright install chromium >/dev/null
+          node .github/probe/cross.js
