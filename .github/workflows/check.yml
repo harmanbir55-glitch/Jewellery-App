@@ -1,0 +1,21 @@
+name: Check live rates on the app
+on:
+  push:
+    branches: [rates-check]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Site and certificate
+        run: |
+          set +e
+          curl -sS -o /dev/null -w "pages %{http_code}\n" https://harmanbir55-glitch.github.io/Jewellery-App/
+          curl -sS https://harmanbir55-glitch.github.io/Jewellery-App/ | grep -c "pjConnect"
+          echo | openssl s_client -connect sladmin.co.in:10001 -servername sladmin.co.in -showcerts 2>/dev/null | grep -E "^ *[0-9] s:|i:|Verify return"
+          true
+      - name: Browsers
+        run: |
+          npm i --no-save playwright@1.47.2 >/dev/null
+          npx playwright install --with-deps chromium webkit firefox >/dev/null 2>&1
+          node .github/check/live.js
