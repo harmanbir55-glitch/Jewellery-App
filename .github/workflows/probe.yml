@@ -1,0 +1,26 @@
+name: Check PJ rates site
+on:
+  push:
+    branches: [rates-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plain fetch
+        run: |
+          set +e
+          dig +short www.pjgoldbullion.in
+          dig +short pjgoldbullion.in
+          echo "== http www =="
+          curl -sS -m 30 -L -A "Mozilla/5.0" -D - -o page.html http://www.pjgoldbullion.in/ ; echo "exit $?"
+          wc -c page.html
+          head -c 40000 page.html
+          echo
+          echo "== https www =="
+          curl -sS -m 20 -I https://www.pjgoldbullion.in/ ; echo "exit $?"
+      - name: Rendered fetch
+        run: |
+          npm i --no-save playwright@1.47.2 >/dev/null
+          npx playwright install chromium >/dev/null
+          node .github/probe/probe.js
