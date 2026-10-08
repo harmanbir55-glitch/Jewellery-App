@@ -106,6 +106,11 @@ label.f span.u{font-weight:500;opacity:.8}
 .rate .u{grid-column:1/-1;font-size:11px;opacity:.7}
 .rate .chg{font-size:11px;font-weight:700}
 .rate .chg.up{color:#9fe0b6}.rate .chg.dn{color:#ffb3a3}
+.rate.pj{border-color:rgba(255,217,168,.35)}
+.rates>.rate{grid-column:span 2}
+.rate .k{font-size:12.5px;line-height:1.25;letter-spacing:.01em}
+.rate .v.up{color:#7fe3a6}.rate .v.dn{color:#ffa08c}
+.pjlive .v{font-weight:600;color:#f6efdc;opacity:.85;font-size:12.5px}
 .rates .warn{background:var(--orange);color:#fff;border-radius:8px;padding:9px 10px;font-size:13px;font-weight:600;display:grid;gap:8px}
 .rates .warn .row{gap:6px}
 .rates .btn{border-color:rgba(255,255,255,.35);background:transparent;color:#fff}
@@ -342,6 +347,7 @@ table.t td.r,table.t th.r{text-align:right}
 @media (max-width:1180px){
   .billtop{grid-template-columns:minmax(0,1fr) 320px}
   .rates,.rate-edit{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rates>.rate{grid-column:span 1}
   .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
   .charts .c4{grid-column:span 6}.charts .c8{grid-column:span 12}
 }
@@ -749,22 +755,29 @@ if(bills.some(b=>!b.id)){bills.forEach((b,i)=>{if(!b.id)b.id='s'+i.toString(36)+
 
 let rateEditing=false;
 const PJ_LINK=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'https://apps.apple.com/in/app/pj-gold-bullion/id1466761389':'https://play.google.com/store/apps/details?id=com.PJGoldBullion';
+// order on screen: the three rates PJ publishes first, then the ones worked out from them
+const RATE_ORDER=['G24','G22','SIL','G18','G14','ISIL'];
+const PJ_NAMES={G24:'GOLD 995 WITH GST',G22:'22CT GOLD JEWELLERY',SIL:'SILVER (SILI) IMPORTED 30KG'};
+function rateName(k){return PJ_NAMES[k]?((PJ.names&&PJ.names[k])||PJ_NAMES[k]):M(k).n}
+function rateNote(k){return PJ_NAMES[k]?M(k).s+' on bills':k==='ISIL'?'Your own rate':'Worked out from 995'}
+function rateTile(k,r,prev,flash){const m=M(k),d=prev?r[k]-prev[k]:0;
+  return `<span class="k">${esc(rateName(k))}</span><span class="v${flash?' '+flash:''}">${inr(r[k])}</span><span class="u">${rateNote(k)} · per ${m.unit} · ₹${(r[k]/m.div).toLocaleString('en-IN',{maximumFractionDigits:2})}/g ${d?`<span class="chg ${d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d).toLocaleString('en-IN')}</span>`:''}</span>`}
 function renderRates(){
   const r=latestRates(),prev=rateHist.length>1?rateHist[rateHist.length-2]:null;
   const isToday=ratesTodaySet();
-  let h=`<div class="head wide"><h2>Today's Punjab rates</h2><div class="date">${isToday?'Updated today, '+fmtDate(r.date)+(r.src==='pj'?' · from PJ Gold Bullion'+(r.time?' at '+r.time:''):''):'Last updated '+fmtDate(r.date)}</div></div><div class="pjlive wide" id="pjLive"></div>`;
+  let h=`<div class="head wide"><h2>Today's Punjab rates</h2><div class="date">${isToday?'Updated today, '+fmtDate(r.date)+(r.src==='pj'?(PJ.state==='live'?' · live from PJ Gold Bullion':' · from PJ Gold Bullion'+(r.time?' at '+r.time:'')):''):'Last updated '+fmtDate(r.date)}</div></div><div class="pjlive wide" id="pjLive"></div>`;
   if(rateEditing){
-    h+=`<div class="rate-edit wide">${METALS.map(m=>`<label class="f">${m.n} <span class="u">₹/${m.unit}</span><input class="inp" type="number" id="re_${m.k}" value="${r[m.k]}" inputmode="decimal"></label>`).join('')}
+    h+=`<div class="rate-edit wide">${RATE_ORDER.map(k=>`<label class="f">${esc(rateName(k))} <span class="u">${M(k).s} · ₹/${M(k).unit}</span><input class="inp" type="number" id="re_${k}" value="${r[k]}" inputmode="decimal"></label>`).join('')}
     <button class="btn sm" id="reCalc" type="button">Work out 22K/18K/14K from 24K</button>
     <div class="row"><button class="btn pri sm" id="reSave">Save today's rates</button><button class="btn sm" id="reCancel">Cancel</button></div></div>`;
   }else{
     if(!isToday)h+=`<div class="warn wide">Rates are not updated for today. They fill in from PJ Gold Bullion when the live rates load, or check the PJ app and confirm.<div class="row"><button class="btn pri sm" id="reSame">Same as ${fmtDate(r.date).slice(0,6)}</button><button class="btn sm" id="reEdit2">Change rates</button></div></div>`;
-    h+=METALS.map(m=>{const d=prev?r[m.k]-prev[m.k]:0;return `<div class="rate" data-k="${m.k}" title="Tap to change"><span class="k">${m.n}</span><span class="v">${inr(r[m.k])}</span><span class="u">per ${m.unit} · ₹${(r[m.k]/m.div).toLocaleString('en-IN',{maximumFractionDigits:2})}/g ${d?`<span class="chg ${d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d).toLocaleString('en-IN')}</span>`:''}</span></div>`}).join('');
+    h+=RATE_ORDER.map(k=>`<div class="rate${PJ_NAMES[k]?' pj':''}" data-k="${k}" title="Tap to change">${rateTile(k,r,prev)}</div>`).join('');
     h+=`<div class="wide row" style="justify-content:space-between"><button class="btn sm" id="reEdit">Change rates</button><a href="${PJ_SITE}" target="_blank" rel="noopener">Open pjgoldbullion.in ↗</a></div>`;
   }
   $('#rates').innerHTML=h;renderPJ();
   const chip=$('#rateChip');
-  if(chip){chip.className='ratechip'+(isToday?'':' warn');chip.textContent=isToday?'Today\'s rate: 22K '+inr(r.G22)+'/10 g':'Set today\'s rates';
+  if(chip){chip.className='ratechip'+(isToday?'':' warn');rateChipText();
     chip.onclick=()=>{if(!isToday){rateEditing=true;renderRates()}$('#ratesSec').scrollIntoView({behavior:'smooth',block:'start'});if(!isToday)setTimeout(()=>{const i=$('#re_G24');if(i){i.focus();i.select()}},350)}}
   const on=(id,f)=>{const el=$(id);if(el)el.onclick=f};
   on('#reEdit',()=>{rateEditing=true;renderRates();$('#re_G24').focus()});
@@ -776,6 +789,7 @@ function renderRates(){
   on('#reSave',()=>{const n={src:'manual'};METALS.forEach(m=>n[m.k]=num($('#re_'+m.k).value));if(METALS.some(m=>!n[m.k])){toast('Enter every rate before saving.');return}saveRates(n)});
   $$('#rates .rate-edit input').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#reSave').click()}});
 }
+function rateChipText(){const c=$('#rateChip');if(c)c.textContent=ratesTodaySet()?'Today\'s rate: 22K '+inr(latestRates().G22)+'/10 g':'Set today\'s rates'}
 function saveRates(n,msg){
   n.date=todayISO();
   if(ratesTodaySet())rateHist[rateHist.length-1]=n;else rateHist.push(n);
@@ -790,12 +804,15 @@ function saveRates(n,msg){
 // SELL rates are used: 24K = GOLD 995 WITH GST, 22K = 22CT GOLD JEWELLERY, Silver = SILVER (SILI) IMPORTED 30KG (per kg).
 // 18K and 14K are worked out from 24K by purity; Italian silver keeps its own rate.
 const PJ_SITE='http://www.pjgoldbullion.in/';
-const PJ={url:'https://sladmin.co.in:10001',client:'punjabbullion',lib:'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js',state:'off',live:null,time:'',day:''};
+const PJ={url:'https://sladmin.co.in:10001',client:'punjabbullion',lib:'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js',state:'off',live:null,time:'',names:{},saved:0,told:false};
 function pjParse(list){
   const rows=(list||[]).filter(x=>String(x.IsDisplay).toLowerCase()!=='false');
   const find=re=>rows.find(x=>re.test(String(x.Symbol||'').toUpperCase()));
   const sell=x=>{const v=x?parseFloat(String(x.Ask).replace(/,/g,'')):0;return isFinite(v)&&v>0?Math.round(v):0};
-  const o={G24:sell(find(/GOLD\s*995(?!.*READY)/)||find(/GOLD\s*99[59]/)),G22:sell(find(/22\s*C(?:T|ARAT)|22\s*K/)),SIL:sell(find(/SILVER.*30\s*KG/)||find(/SILVER/))};
+  const g24=find(/GOLD\s*995(?!.*READY)/)||find(/GOLD\s*99[59]/),g22=find(/22\s*C(?:T|ARAT)|22\s*K/),sil=find(/SILVER.*30\s*KG/)||find(/SILVER/);
+  const o={G24:sell(g24),G22:sell(g22),SIL:sell(sil)};
+  // keep PJ's own names so the rates read exactly as on pjgoldbullion.in
+  [['G24',g24],['G22',g22],['SIL',sil]].forEach(([k,x])=>{if(x&&x.Symbol)PJ.names[k]=String(x.Symbol).trim()});
   return o.G24||o.G22||o.SIL?o:null;
 }
 function pjRates(){
@@ -807,8 +824,25 @@ function pjRates(){
   n.SIL=l.SIL||r.SIL;n.ISIL=r.ISIL;
   return n;
 }
-function pjApply(auto){if(PJ.live)saveRates(pjRates(),auto?'Today\'s rates filled in from PJ Gold Bullion.':'Rates updated from PJ Gold Bullion.')}
-function pjNow(){return new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true})}
+function pjApply(){if(PJ.live){PJ.told=true;saveRates(pjRates(),'Rates are live from PJ Gold Bullion again.')}}
+function pjNow(){return new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}
+function pjFollowing(){return !ratesTodaySet()||latestRates().src==='pj'}
+// put the newest PJ rates into today's rates; redraw only what changed so typing elsewhere is not disturbed
+function pjTick(){
+  if(rateEditing||!pjFollowing())return;
+  const first=!ratesTodaySet(),old=latestRates(),n=Object.assign(pjRates(),{date:todayISO()});
+  const changed=first||RATE_ORDER.some(k=>n[k]!==old[k]);
+  if(first)rateHist.push(n);else rateHist[rateHist.length-1]=n;
+  const now=Date.now();if(first||now-PJ.saved>15000){store.set('rates',rateHist);PJ.saved=now}
+  if(first||!$('#rates .rate')){renderRates()}
+  else if(changed){const prev=rateHist.length>1?rateHist[rateHist.length-2]:null;
+    RATE_ORDER.forEach(k=>{const el=$('#rates .rate[data-k="'+k+'"]');if(el&&n[k]!==old[k])el.innerHTML=rateTile(k,n,prev,n[k]>old[k]?'up':'dn')});
+    const d=$('#rates .date');if(d)d.textContent='Updated today, '+fmtDate(n.date)+' · live from PJ Gold Bullion';
+    rateChipText()}
+  if(changed&&!entryRateTouched){setEntryRate();updateEntry()}
+  if(!PJ.told){PJ.told=true;toast('Today\'s rates are live from PJ Gold Bullion.')}
+}
+addEventListener('pagehide',()=>{if(PJ.saved)store.set('rates',rateHist)});
 function pjConnect(){
   if(PJ.state!=='off')return;
   PJ.state='connecting';renderPJ();
@@ -821,9 +855,8 @@ function pjConnect(){
       sock.on('message',d=>{
         const o=pjParse(d&&d.Rate);if(!o)return;
         PJ.live=o;PJ.time=pjNow();PJ.state='live';
-        // first live rates of the day fill today's rates, unless today's rates were typed by hand
-        if(PJ.day!==todayISO()&&!rateEditing){PJ.day=todayISO();const r=latestRates();if(!ratesTodaySet()||r.src==='pj'){pjApply(true);return}}
-        renderPJ();
+        // today's rates follow PJ live, unless today's rates were typed by hand
+        pjTick();renderPJ();
       });
       sock.on('connect_error',down);
       sock.on('disconnect',()=>{PJ.state='down';renderPJ()});
@@ -839,17 +872,16 @@ function renderPJ(){
   if(el.dataset.st!==st){
     el.dataset.st=st;
     el.innerHTML=st==='live'
-      ?`<span class="dot"></span><b>PJ live</b> <span class="t" id="pjT"></span><span class="v" id="pjV"></span><button class="btn sm pri" id="pjUse" type="button">Use these rates</button>`
+      ?`<span class="dot"></span><b>PJ live</b><span class="t" id="pjT"></span><span class="v" id="pjV"></span><button class="btn sm pri" id="pjUse" type="button">Use PJ live rates</button>`
       :st==='wait'?`<span class="dot"></span>Getting live rates from PJ Gold Bullion…`
       :`<span class="dot"></span><span>PJ live rates can't be reached right now. Type today's rates with Change rates, or check the <a href="${PJ_LINK}" target="_blank" rel="noopener">PJ app ↗</a></span>`;
-    const b=$('#pjUse');if(b)b.onclick=()=>pjApply(false);
+    const b=$('#pjUse');if(b)b.onclick=()=>pjApply();
   }
   if(st==='live'){
-    const l=PJ.live;
+    const follow=pjFollowing();
     $('#pjT').textContent=PJ.time;
-    $('#pjV').textContent=[l.G24?'995 Gold '+inr(l.G24):'',l.G22?'22CT '+inr(l.G22):'',l.SIL?'Silver '+inr(l.SIL)+'/kg':''].filter(Boolean).join(' · ');
-    const r=latestRates(),same=ratesTodaySet()&&r.src==='pj'&&r.G24===pjRates().G24&&r.G22===pjRates().G22&&r.SIL===pjRates().SIL;
-    $('#pjUse').hidden=same;
+    $('#pjV').textContent=rateEditing?'Paused while you change rates':follow?'Rates below update by themselves':'You typed today\'s rates, so they stay as typed';
+    $('#pjUse').hidden=follow||rateEditing;
   }
 }
 

@@ -19,7 +19,7 @@ Open `index.html` in Chrome (Safari on iPhone). Everything is in that one file.
 
 ## Features
 
-- Live rates from PJ Gold Bullion (pjgoldbullion.in): today's 24K (995), 22K and Silver fill in by themselves when the app opens; 18K and 14K are worked out from 24K; every rate can still be changed by hand
+- Live rates from PJ Gold Bullion (pjgoldbullion.in), shown first under PJ's own names (GOLD 995 WITH GST, 22CT GOLD JEWELLERY, SILVER (SILI) IMPORTED 30KG) and updating live; 18K and 14K are worked out from 995; any rate can still be typed by hand
 - Polish = net wt × polish % (gold only), 15% by default
 - Weight = net wt + polish wt − stone wt
 - Metal price = weight × rate, Diamond price = carat × rate per carat, Price = metal + diamond
